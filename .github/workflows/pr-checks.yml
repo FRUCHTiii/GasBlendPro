@@ -1,0 +1,111 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+env:
+  SCHEME: GasBlendPro
+  CONFIGURATION: Debug
+
+jobs:
+  lint:
+    name: SwiftLint
+    runs-on: macos-14
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Run SwiftLint
+        run: swiftlint lint --strict --reporter github-actions-logging
+
+  test:
+    name: Unit Tests
+    runs-on: macos-14
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Install xcbeautify
+        run: brew install xcbeautify
+
+      - name: Build and Test
+        run: |
+          xcodebuild clean test \
+            -scheme "${{ env.SCHEME }}" \
+            -configuration "${{ env.CONFIGURATION }}" \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -enableCodeCoverage YES \
+            -derivedDataPath DerivedData \
+            | xcbeautify
+
+      - name: Upload code coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./DerivedData/Logs/Test/*.xcresult
+          fail_ci_if_error: false
+
+  build:
+    name: Build Check
+    runs-on: macos-14
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+
+      - name: Build for Device
+        run: |
+          xcodebuild clean build \
+            -scheme "${{ env.SCHEME }}" \
+            -configuration "${{ env.CONFIGURATION }}" \
+            -destination generic/platform=iOS \
+            -derivedDataPath DerivedData \
+            | xcbeautify
+
+  security-audit:
+    name: Security Audit
+    runs-on: macos-14
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for secrets in code
+        run: |
+          if grep -r "sk_live_\|pk_live_\|api_key\|password\|secret" --include="*.swift" GasBlendPro/; then
+            echo "Potential secrets found in code!"
+            exit 1
+          fi
+
+      - name: Validate Info.plist
+        run: |
+          plutil -lint GasBlendPro/Info.plist || echo "Info.plist validation check"
+
+  validation:
+    name: Code Validation
+    runs-on: macos-14
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for TODOs and FIXMEs
+        run: |
+          echo "Checking for TODOs and FIXMEs..."
+          grep -r "TODO\|FIXME" --include="*.swift" GasBlendPro/ || echo "No TODOs or FIXMEs found"
+
+      - name: Validate Swift formatting
+        run: |
+          brew install swift-format
+          swift-format lint -r GasBlendPro/

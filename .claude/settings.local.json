@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(ls:*)",
+      "Bash(npm install:*)",
+      "Bash(find:*)",
+      "Bash(/opt/homebrew/bin/swiftlint lint:*)",
+      "Bash(/usr/local/bin/swiftlint lint:*)",
+      "Bash(swiftlint lint:*)",
+      "Bash(xcodebuild test:*)",
+      "Bash(swiftlint:*)",
+      "Bash(tee:*)",
+      "Bash(swift test)",
+      "Bash(xcodebuild:*)",
+      "Bash(plutil:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote set-url:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

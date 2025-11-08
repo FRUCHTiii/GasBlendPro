@@ -65,13 +65,6 @@ jobs:
           # Clean up
           rm certificate.p12
 
-      - name: Import Provisioning Profile
-        env:
-          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
-        run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$PROVISIONING_PROFILE" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
-
       - name: Increment Build Number
         run: |
           # Get the current build number from GitHub

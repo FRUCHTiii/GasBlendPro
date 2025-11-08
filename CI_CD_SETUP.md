@@ -98,12 +98,12 @@ Add the following secrets:
 | `APPLE_TEAM_ID` | Your Apple Team ID | developer.apple.com → Membership |
 | `CERTIFICATES_P12` | Base64 encoded .p12 certificate | Export from Keychain, base64 encode |
 | `CERTIFICATES_P12_PASSWORD` | Password for .p12 file | The password you set when exporting |
-| `PROVISIONING_PROFILE` | Base64 provisioning profile | Download from developer.apple.com, base64 encode |
-| `PROVISIONING_PROFILE_APPSTORE` | App Store provisioning profile | Same as above, for App Store |
 | `APP_STORE_CONNECT_API_KEY_ID` | API Key ID | From App Store Connect API key |
 | `APP_STORE_CONNECT_API_ISSUER_ID` | Issuer ID | From App Store Connect |
 | `APP_STORE_CONNECT_API_KEY` | Base64 encoded .p8 key | `base64 -i AuthKey_XXX.p8 \| pbcopy` |
 | `KEYCHAIN_PASSWORD` | Random password | Generate: `openssl rand -base64 32` |
+
+**Note:** Provisioning profiles are NOT required. The workflows use `-allowProvisioningUpdates` which automatically generates profiles using your App Store Connect API key.
 
 ### 4. Create Export Options Files
 

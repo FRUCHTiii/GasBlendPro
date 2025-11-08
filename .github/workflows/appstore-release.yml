@@ -67,13 +67,6 @@ jobs:
           security default-keychain -s "$KEYCHAIN_PATH"
           rm certificate.p12
 
-      - name: Import Provisioning Profile
-        env:
-          PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE_APPSTORE }}
-        run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$PROVISIONING_PROFILE" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
-
       - name: Update Version and Build Number
         run: |
           VERSION="${{ inputs.version }}"

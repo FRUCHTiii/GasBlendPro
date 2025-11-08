@@ -459,6 +459,9 @@ struct BlendingCalculatorView: View {
     }
 
     private func performCalculation() {
+        // Dismiss keyboard
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+
         // Clear previous error and result
         errorMessage = nil
         blendingResult = nil

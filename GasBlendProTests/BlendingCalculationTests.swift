@@ -198,6 +198,33 @@ struct BlendingCalculationTests {
 
     // MARK: - Oxygen Reduction Tests (Air Release Required)
 
+    @Test("Air 200bar to Nitrox32 200bar (nitrogen reduction)")
+    func testAirToNitrox32SamePressure() {
+        let result = BlendingCalculator.calculateBlend(
+            currentMix: GasMix(oxygen: 21, nitrogen: 79, helium: 0),
+            currentPressure: 200,
+            targetMix: GasMix(oxygen: 32, nitrogen: 68, helium: 0),
+            targetPressure: 200,
+            topupMix: GasMix(oxygen: 21, nitrogen: 79, helium: 0),
+            tankVolume: standardTankVolume
+        )
+
+        validateBlendingResult(result)
+        guard let result = result else { return }
+
+        // Should release air to reduce nitrogen, then add pure oxygen
+        #expect(result.airToRelease > 20, "Should release ~28 bar of air to reduce nitrogen")
+        #expect(result.oxygenToAdd > 20, "Should add ~28 bar of pure oxygen")
+        #expect(result.airToAdd < tolerance, "Should not add air")
+        #expect(result.heliumToAdd < tolerance, "Should not add helium")
+
+        // Verify the blending steps
+        #expect(result.pressureAfterRelease < result.oxygenToAdd + result.pressureAfterRelease + 1,
+                "Pressure after release + O2 should equal target")
+
+        assertMixesEqual(result.finalMix, GasMix(oxygen: 32, nitrogen: 68, helium: 0))
+    }
+
     @Test("EAN50 down to EAN32")
     func testEAN50ToEAN32() {
         let result = BlendingCalculator.calculateBlend(

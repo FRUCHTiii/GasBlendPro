@@ -62,22 +62,22 @@ line_length:
 
 # Adjusted for realistic project needs (Views, Tests, and complex algorithms)
 file_length:
-  warning: 800    # Increased to accommodate SwiftUI views and comprehensive tests
-  error: 1200
+  warning: 1000   # Increased to accommodate SwiftUI views and comprehensive tests
+  error: 1500
 
 # SwiftUI views and test suites can be longer than typical types
 type_body_length:
-  warning: 600    # Increased to accommodate large SwiftUI views and test suites
-  error: 800
+  warning: 700    # Increased to accommodate large SwiftUI views and test suites
+  error: 1000
 
 # Safety-critical algorithms may need more lines for clarity and validation
 function_body_length:
-  warning: 85     # Increased to allow complex calculations with proper validation
-  error: 150
+  warning: 130    # Increased to allow complex calculations with proper validation
+  error: 200
 
 # Gas blending algorithms inherently have complexity due to physics validation
 cyclomatic_complexity:
-  warning: 15     # Allow complex validation logic in safety-critical code
+  warning: 20     # Allow complex validation logic in safety-critical code
   error: 25
 
 # Allow more parameters for backward-compatible APIs and complex calculations

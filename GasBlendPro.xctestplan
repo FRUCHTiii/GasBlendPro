@@ -1,0 +1,37 @@
+{
+  "configurations" : [
+    {
+      "id" : "66CFE518-7993-461D-8142-1FC02891EE52",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:GasBlendPro.xcodeproj",
+      "identifier" : "E0BA52012EBB7D71002A58A0",
+      "name" : "GasBlendPro"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:GasBlendPro.xcodeproj",
+        "identifier" : "E0BA52152EBB7D72002A58A0",
+        "name" : "GasBlendProTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:GasBlendPro.xcodeproj",
+        "identifier" : "E0BA521F2EBB7D72002A58A0",
+        "name" : "GasBlendProUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

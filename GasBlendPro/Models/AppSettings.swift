@@ -40,12 +40,33 @@ class AppSettings {
     var id: UUID
     var topUpGasRawValue: String
     var appearanceModeRawValue: String
+
+    // Default Blender Settings - with default values for migration
+    var defaultCurrentOxygen: Double = 21.0
+    var defaultCurrentHelium: Double = 0.0
+    var defaultTargetOxygen: Double = 32.0
+    var defaultTargetHelium: Double = 0.0
+    var defaultTargetPressure: Double = 200.0
+
     var lastModified: Date
 
-    init(topUpGas: TopUpGas = .air, appearanceMode: AppearanceMode = .system) {
+    init(
+        topUpGas: TopUpGas = .air,
+        appearanceMode: AppearanceMode = .system,
+        defaultCurrentOxygen: Double = 21.0,
+        defaultCurrentHelium: Double = 0.0,
+        defaultTargetOxygen: Double = 32.0,
+        defaultTargetHelium: Double = 0.0,
+        defaultTargetPressure: Double = 200.0
+    ) {
         self.id = UUID()
         self.topUpGasRawValue = topUpGas.rawValue
         self.appearanceModeRawValue = appearanceMode.rawValue
+        self.defaultCurrentOxygen = defaultCurrentOxygen
+        self.defaultCurrentHelium = defaultCurrentHelium
+        self.defaultTargetOxygen = defaultTargetOxygen
+        self.defaultTargetHelium = defaultTargetHelium
+        self.defaultTargetPressure = defaultTargetPressure
         self.lastModified = Date()
     }
 
@@ -65,6 +86,37 @@ class AppSettings {
         }
         set {
             appearanceModeRawValue = newValue.rawValue
+            lastModified = Date()
+        }
+    }
+
+    // Computed properties for default gas mixes
+    var defaultCurrentMix: GasMix {
+        get {
+            GasMix(
+                oxygen: defaultCurrentOxygen,
+                nitrogen: max(0, 100.0 - defaultCurrentOxygen - defaultCurrentHelium),
+                helium: defaultCurrentHelium
+            )
+        }
+        set {
+            defaultCurrentOxygen = newValue.oxygen
+            defaultCurrentHelium = newValue.helium
+            lastModified = Date()
+        }
+    }
+
+    var defaultTargetMix: GasMix {
+        get {
+            GasMix(
+                oxygen: defaultTargetOxygen,
+                nitrogen: max(0, 100.0 - defaultTargetOxygen - defaultTargetHelium),
+                helium: defaultTargetHelium
+            )
+        }
+        set {
+            defaultTargetOxygen = newValue.oxygen
+            defaultTargetHelium = newValue.helium
             lastModified = Date()
         }
     }

@@ -125,11 +125,29 @@ jobs:
           APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
         run: |
+          # Create private_keys directory
+          mkdir -p ~/.appstoreconnect/private_keys
+
+          # Decode base64 API key and write to file (macOS base64 uses -D for decode)
+          echo "$APP_STORE_CONNECT_API_KEY" | base64 -D > ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
+
+          # Set proper permissions
+          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
+
+          # Verify the file was created and show first line (should be -----BEGIN PRIVATE KEY-----)
+          echo "API Key file created:"
+          ls -lh ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
+          head -n 1 ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
+
+          # Upload to TestFlight
           xcrun altool --upload-app \
             --type ios \
             --file "$RUNNER_TEMP/GasBlendPro/GasBlendPro.ipa" \
             --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
             --apiIssuer "$APP_STORE_CONNECT_API_ISSUER_ID"
+
+          # Clean up the API key file
+          rm -f ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
 
       - name: Upload IPA as artifact
         uses: actions/upload-artifact@v4

@@ -6,6 +6,27 @@ struct BlendingCalculatorView: View {
     private var modelContext
     @Query(sort: \GasPreset.createdAt)
     private var presets: [GasPreset]
+    @Query private var settings: [AppSettings]
+
+    // Session persistence - survives navigation but not app restart
+    @AppStorage("session.currentOxygen")
+    private var sessionCurrentOxygen: Double?
+    @AppStorage("session.currentHelium")
+    private var sessionCurrentHelium: Double?
+    @AppStorage("session.currentPressure")
+    private var sessionCurrentPressure: Double?
+    @AppStorage("session.targetOxygen")
+    private var sessionTargetOxygen: Double?
+    @AppStorage("session.targetHelium")
+    private var sessionTargetHelium: Double?
+    @AppStorage("session.targetPressure")
+    private var sessionTargetPressure: Double?
+    @AppStorage("session.tankVolume")
+    private var sessionTankVolume: Double?
+    @AppStorage("session.resultJSON")
+    private var sessionResultJSON: String?
+    @AppStorage("session.hasActiveSession")
+    private var hasActiveSession: Bool = false
 
     @State private var currentMix = GasMix(oxygen: 21, nitrogen: 79, helium: 0)
     @State private var currentPressure: Double = 100
@@ -23,6 +44,7 @@ struct BlendingCalculatorView: View {
     @State private var errorMessage: String?
     @State private var isCurrentPresetManuallyChanged = false
     @State private var isTargetPresetManuallyChanged = false
+    @State private var isInitialized = false
 
     var body: some View {
         ZStack {
@@ -61,9 +83,30 @@ struct BlendingCalculatorView: View {
             }
         }
         .navigationTitle("Blender")
-        .onAppear {
-            initializePresets()
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    resetToDefaults()
+                } label: {
+                    Image(systemName: "arrow.counterclockwise")
+                        .font(.system(size: 17))
+                }
+            }
         }
+        .onAppear {
+            if !isInitialized {
+                initializePresets()
+                isInitialized = true
+            }
+        }
+        .onChange(of: currentMix.oxygen) { saveSession() }
+        .onChange(of: currentHelium) { saveSession() }
+        .onChange(of: currentPressure) { saveSession() }
+        .onChange(of: targetMix.oxygen) { saveSession() }
+        .onChange(of: targetHelium) { saveSession() }
+        .onChange(of: targetPressure) { saveSession() }
+        .onChange(of: tankVolume) { saveSession() }
+        .onChange(of: blendingResult) { saveSession() }
     }
 
     // MARK: - View Components
@@ -613,10 +656,99 @@ struct BlendingCalculatorView: View {
     }
 
     private func initializePresets() {
-        // Initialize current preset (Air: 21% O2, 0% He)
+        // Check if there's an active session to restore
+        if hasActiveSession, let sessionCO2 = sessionCurrentOxygen,
+           let sessionCHe = sessionCurrentHelium,
+           let sessionCP = sessionCurrentPressure,
+           let sessionTO2 = sessionTargetOxygen,
+           let sessionTHe = sessionTargetHelium,
+           let sessionTP = sessionTargetPressure,
+           let sessionTV = sessionTankVolume {
+            // Restore from session
+            currentMix = GasMix(oxygen: sessionCO2, nitrogen: max(0, 100 - sessionCO2 - sessionCHe), helium: sessionCHe)
+            currentHelium = sessionCHe
+            currentPressure = sessionCP
+            targetMix = GasMix(oxygen: sessionTO2, nitrogen: max(0, 100 - sessionTO2 - sessionTHe), helium: sessionTHe)
+            targetHelium = sessionTHe
+            targetPressure = sessionTP
+            tankVolume = sessionTV
+
+            // Restore calculation result if available
+            if let resultJSON = sessionResultJSON,
+               let resultData = resultJSON.data(using: .utf8),
+               let result = try? JSONDecoder().decode(BlendingResult.self, from: resultData) {
+                blendingResult = result
+            }
+        } else {
+            // Load defaults from settings
+            if let appSettings = settings.first {
+                currentMix = appSettings.defaultCurrentMix
+                currentHelium = appSettings.defaultCurrentHelium
+                targetMix = appSettings.defaultTargetMix
+                targetHelium = appSettings.defaultTargetHelium
+                targetPressure = appSettings.defaultTargetPressure
+            }
+        }
+
+        // Initialize current preset based on loaded values
         checkAndUpdateCurrentPreset()
 
-        // Initialize target preset (EAN32: 32% O2, 0% He)
+        // Initialize target preset based on loaded values
+        checkAndUpdateTargetPreset()
+    }
+
+    private func saveSession() {
+        sessionCurrentOxygen = currentMix.oxygen
+        sessionCurrentHelium = currentHelium
+        sessionCurrentPressure = currentPressure
+        sessionTargetOxygen = targetMix.oxygen
+        sessionTargetHelium = targetHelium
+        sessionTargetPressure = targetPressure
+        sessionTankVolume = tankVolume
+
+        // Save calculation result if available
+        if let result = blendingResult,
+           let resultData = try? JSONEncoder().encode(result),
+           let resultJSON = String(data: resultData, encoding: .utf8) {
+            sessionResultJSON = resultJSON
+        } else {
+            sessionResultJSON = nil
+        }
+
+        hasActiveSession = true
+    }
+
+    private func resetToDefaults() {
+        // Clear session
+        hasActiveSession = false
+        sessionCurrentOxygen = nil
+        sessionCurrentHelium = nil
+        sessionCurrentPressure = nil
+        sessionTargetOxygen = nil
+        sessionTargetHelium = nil
+        sessionTargetPressure = nil
+        sessionTankVolume = nil
+        sessionResultJSON = nil
+
+        // Clear results and errors
+        blendingResult = nil
+        errorMessage = nil
+
+        // Load defaults from settings
+        if let appSettings = settings.first {
+            currentMix = appSettings.defaultCurrentMix
+            currentHelium = appSettings.defaultCurrentHelium
+            targetMix = appSettings.defaultTargetMix
+            targetHelium = appSettings.defaultTargetHelium
+            targetPressure = appSettings.defaultTargetPressure
+        }
+
+        // Reset to default pressure
+        currentPressure = 100
+        tankVolume = 12
+
+        // Update presets
+        checkAndUpdateCurrentPreset()
         checkAndUpdateTargetPreset()
     }
 

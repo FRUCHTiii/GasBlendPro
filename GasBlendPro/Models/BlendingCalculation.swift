@@ -329,12 +329,80 @@ class BlendingCalculator {
         var startingPressure = input.currentPressure
         var startingO2Partial = currentO2Partial
 
-        // Calculate initial O2 needed
+        // Calculate initial O2 and N2 needed
         let targetN2Partial = (input.targetPressure * input.targetMix.nitrogen) / 100.0
         let currentN2Partial = (input.currentPressure * input.currentMix.nitrogen) / 100.0
         guard targetN2Partial.isFinite && currentN2Partial.isFinite else { return nil }
 
         let n2ToAdd = targetN2Partial - currentN2Partial
+
+        // Check if we need to reduce nitrogen (and thus release air)
+        if n2ToAdd < -0.01 {
+            // Need to release air to reduce nitrogen
+            // Calculate what pressure gives us the target nitrogen partial pressure
+            let pressureForTargetN2 = (targetN2Partial * 100.0) / input.currentMix.nitrogen
+            guard pressureForTargetN2.isFinite && pressureForTargetN2 > 0 else { return nil }
+
+            // Make sure we're not trying to increase pressure while removing nitrogen
+            guard pressureForTargetN2 <= input.currentPressure else { return nil }
+
+            airToRelease = input.currentPressure - pressureForTargetN2
+            pressureAfterRelease = pressureForTargetN2
+            startingPressure = pressureForTargetN2
+            startingO2Partial = (pressureForTargetN2 * input.currentMix.oxygen) / 100.0
+
+            // After releasing air, we should only need to add pure oxygen to reach target pressure
+            // Verify that adding pure O2 will give us the correct final O2 percentage
+            let o2AfterRelease = startingO2Partial
+            let o2ToAdd = targetO2Partial - o2AfterRelease
+            guard o2ToAdd >= -0.01 else { return nil } // Can't remove oxygen
+
+            let actualO2ToAdd = max(0, o2ToAdd)
+            let actualAirToAdd = 0.0 // No air needed since we already have correct N2
+
+            // Verify final pressure will be correct
+            let calculatedFinalPressure = pressureForTargetN2 + actualO2ToAdd
+            guard abs(calculatedFinalPressure - input.targetPressure) < 0.2 else { return nil }
+
+            // Pressure after adding helium (none in this case)
+            let pressureAfterHe = startingPressure + heToAdd
+
+            // Final pressure after adding oxygen
+            let finalPressure = pressureAfterHe + actualO2ToAdd
+
+            // Validate final pressure
+            guard abs(finalPressure - input.targetPressure) < 0.2 else { return nil }
+
+            // Calculate volumes
+            let o2Volume = actualO2ToAdd * input.tankVolume
+            let heVolume = heToAdd * input.tankVolume
+
+            // Calculate final mix percentage
+            let finalMix = GasMix(
+                oxygen: (targetO2Partial / input.targetPressure) * 100.0,
+                nitrogen: (targetN2Partial / input.targetPressure) * 100.0,
+                helium: (targetHePartial / input.targetPressure) * 100.0
+            )
+
+            // Build and validate result
+            let components = BlendingResultComponents(
+                heToAdd: heToAdd,
+                actualO2ToAdd: actualO2ToAdd,
+                actualAirToAdd: actualAirToAdd,
+                heVolume: heVolume,
+                o2Volume: o2Volume,
+                pressureAfterHe: pressureAfterHe,
+                finalPressure: finalPressure,
+                airToRelease: airToRelease,
+                pressureAfterRelease: pressureAfterRelease,
+                finalMix: finalMix
+            )
+
+            guard let result = buildBlendingResult(components) else { return nil }
+            return result.isValid ? result : nil
+        }
+
+        // Normal case: adding nitrogen (as air)
         let airToAdd = n2ToAdd / BlendingConstants.airNitrogenFraction
         guard airToAdd.isFinite else { return nil }
 
@@ -342,7 +410,7 @@ class BlendingCalculator {
         let o2Needed = targetO2Partial - currentO2Partial - o2FromAir
         guard o2Needed.isFinite else { return nil }
 
-        // Check if we need to release air (for oxygen reduction)
+        // Check if we need to release air (for oxygen reduction while adding nitrogen)
         if o2Needed < -0.01 {
             if let optimalPressure = findOptimalPressureForO2Reduction(
                 currentPressure: input.currentPressure,

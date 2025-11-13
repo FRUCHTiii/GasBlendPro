@@ -53,7 +53,7 @@ struct HomeView: View {
 
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Gas Blender Pro")
+            Text("Gas Blend Pro")
                 .font(.system(size: 32, weight: .bold, design: .default))
                 .tracking(-0.5)
 

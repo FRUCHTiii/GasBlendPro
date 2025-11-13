@@ -16,7 +16,12 @@
       "Bash(plutil:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git remote set-url:*)"
+      "Bash(git remote set-url:*)",
+      "Bash(/usr/libexec/PlistBuddy:*)",
+      "Bash(swift test:*)",
+      "Bash(cat:*)",
+      "Bash(open:*)",
+      "Bash(git tag:*)"
     ],
     "deny": [],
     "ask": []

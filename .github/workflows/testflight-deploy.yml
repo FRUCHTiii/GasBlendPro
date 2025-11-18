@@ -32,34 +32,34 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Install dependencies
+      - name: Install Fastlane
         run: |
-          brew install xcbeautify
-          gem install fastlane
+          brew install fastlane
+          fastlane --version
 
-      - name: Import Code-Signing Certificates and Provisioning Profile
+      - name: Setup Code Signing
         env:
           CERTIFICATES_P12: ${{ secrets.CERTIFICATES_P12 }}
           CERTIFICATES_P12_PASSWORD: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           PROVISIONING_PROFILE: ${{ secrets.PROVISIONING_PROFILE }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          # Create a temporary keychain
+          # Create temporary keychain
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
           # Import certificate
-          echo "$CERTIFICATES_P12" | base64 -D > certificate.p12
-          security import certificate.p12 \
+          echo "$CERTIFICATES_P12" | base64 -D > $RUNNER_TEMP/certificate.p12
+          security import $RUNNER_TEMP/certificate.p12 \
             -k "$KEYCHAIN_PATH" \
             -P "$CERTIFICATES_P12_PASSWORD" \
             -T /usr/bin/codesign \
             -T /usr/bin/security
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-          # Set default keychain
+          # Set as default keychain
           security list-keychains -d user -s "$KEYCHAIN_PATH"
           security default-keychain -s "$KEYCHAIN_PATH"
 
@@ -68,127 +68,37 @@ jobs:
           PROFILE_PATH=~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
           echo "$PROVISIONING_PROFILE" | base64 -D > "$PROFILE_PATH"
 
-          # Extract provisioning profile UUID
+          # Extract provisioning profile UUID and name
           PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH"))
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH"))
+
           echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
+          echo "PROFILE_NAME=$PROFILE_NAME" >> $GITHUB_ENV
           echo "Provisioning Profile UUID: $PROFILE_UUID"
+          echo "Provisioning Profile Name: $PROFILE_NAME"
 
           # Clean up
-          rm certificate.p12
+          rm $RUNNER_TEMP/certificate.p12
 
-      - name: Increment Build Number
-        run: |
-          # Get the current build number from GitHub
-          BUILD_NUMBER=${{ github.run_number }}
-
-          # Update build number in project
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "GasBlendPro/Info.plist" || true
-
-          echo "Build number set to: $BUILD_NUMBER"
-
-      - name: Update Version Number
-        run: |
-          VERSION=${{ steps.version.outputs.version }}
-          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "GasBlendPro/Info.plist" || true
-          echo "Version number set to: $VERSION"
-
-      - name: Build Archive
-        run: |
-          set -o pipefail
-          xcodebuild archive \
-            -scheme "${{ env.SCHEME }}" \
-            -configuration "${{ env.CONFIGURATION }}" \
-            -destination generic/platform=iOS \
-            -archivePath "$RUNNER_TEMP/GasBlendPro.xcarchive" \
-            DEVELOPMENT_TEAM="${{ secrets.APPLE_TEAM_ID }}" \
-            CODE_SIGN_STYLE=Manual \
-            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_UUID" \
-            | xcbeautify
-
-          # Verify archive was created
-          if [ ! -d "$RUNNER_TEMP/GasBlendPro.xcarchive" ]; then
-            echo "❌ Archive was not created!"
-            exit 1
-          fi
-          echo "✅ Archive created successfully"
-
-      - name: Create ExportOptions.plist
-        run: |
-          cat > /tmp/ExportOptions.plist << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>app-store</string>
-              <key>teamID</key>
-              <string>\${{ secrets.APPLE_TEAM_ID }}</string>
-              <key>uploadSymbols</key>
-              <true/>
-              <key>uploadBitcode</key>
-              <false/>
-          </dict>
-          </plist>
-          EOF
-
-      - name: Export IPA
-        run: |
-          xcodebuild -exportArchive \
-            -archivePath "$RUNNER_TEMP/GasBlendPro.xcarchive" \
-            -exportPath "$RUNNER_TEMP/GasBlendPro" \
-            -exportOptionsPlist /tmp/ExportOptions.plist \
-            | xcbeautify
-
-      - name: Upload to TestFlight
+      - name: Deploy to TestFlight with Fastlane
         env:
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          BUILD_NUMBER: ${{ github.run_number }}
+          VERSION_NUMBER: ${{ steps.version.outputs.version }}
+          PROVISIONING_PROFILE_SPECIFIER: ${{ env.PROFILE_UUID }}
         run: |
-          # Create private_keys directory
-          mkdir -p ~/.appstoreconnect/private_keys
-
-          # Decode base64 API key and write to file (macOS base64 uses -D for decode)
-          echo "$APP_STORE_CONNECT_API_KEY" | base64 -D > ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
-
-          # Set proper permissions
-          chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
-
-          # Verify the file was created and show first line (should be -----BEGIN PRIVATE KEY-----)
-          echo "API Key file created:"
-          ls -lh ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
-          head -n 1 ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
-
-          # Upload to TestFlight
-          xcrun altool --upload-app \
-            --type ios \
-            --file "$RUNNER_TEMP/GasBlendPro/GasBlendPro.ipa" \
-            --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
-            --apiIssuer "$APP_STORE_CONNECT_API_ISSUER_ID"
-
-          # Clean up the API key file
-          rm -f ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
+          fastlane beta
 
       - name: Upload IPA as artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: GasBlendPro-${{ steps.version.outputs.version }}
-          path: ${{ runner.temp }}/GasBlendPro/GasBlendPro.ipa
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ${{ runner.temp }}/GasBlendPro/GasBlendPro.ipa
-          body: |
-            ## Gas Blender Pro v${{ steps.version.outputs.version }}
-
-            Released to TestFlight
-
-            Build: ${{ github.run_number }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: "*.ipa"
+          if-no-files-found: warn
 
       - name: Notify on Success
         if: success()

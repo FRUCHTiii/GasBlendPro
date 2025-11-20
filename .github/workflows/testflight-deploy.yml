@@ -65,17 +65,23 @@ jobs:
 
           # Import provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          PROFILE_PATH=~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
-          echo "$PROVISIONING_PROFILE" | base64 -D > "$PROFILE_PATH"
+          TEMP_PROFILE=$RUNNER_TEMP/profile.mobileprovision
+          echo "$PROVISIONING_PROFILE" | base64 -D > "$TEMP_PROFILE"
 
           # Extract provisioning profile UUID and name
-          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH"))
-          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH"))
+          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i "$TEMP_PROFILE"))
+          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< $(security cms -D -i "$TEMP_PROFILE"))
+
+          # Copy profile with UUID as filename (this is how Xcode expects it)
+          cp "$TEMP_PROFILE" ~/Library/MobileDevice/Provisioning\ Profiles/${PROFILE_UUID}.mobileprovision
 
           echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
           echo "PROFILE_NAME=$PROFILE_NAME" >> $GITHUB_ENV
           echo "Provisioning Profile UUID: $PROFILE_UUID"
           echo "Provisioning Profile Name: $PROFILE_NAME"
+
+          # Verify profile is installed
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
 
           # Clean up
           rm $RUNNER_TEMP/certificate.p12

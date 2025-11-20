@@ -28,7 +28,11 @@ platform :ios do
       scheme: "GasBlendPro",
       configuration: "Release",
       export_method: "app-store",
+      codesigning_identity: "Apple Distribution",
+      export_xcargs: "-allowProvisioningUpdates",
+      xcargs: "CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER='#{ENV['PROVISIONING_PROFILE_SPECIFIER']}' DEVELOPMENT_TEAM='#{ENV['APPLE_TEAM_ID']}'",
       export_options: {
+        method: "app-store",
         teamID: ENV["APPLE_TEAM_ID"],
         provisioningProfiles: {
           "de.werk4-services.GasBlendPro" => ENV["PROVISIONING_PROFILE_SPECIFIER"]

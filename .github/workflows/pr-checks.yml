@@ -24,59 +24,62 @@ jobs:
       - name: Run SwiftLint
         run: swiftlint lint --strict --reporter github-actions-logging
 
-  test:
-    name: Unit Tests
-    runs-on: macos-14
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # Disabled to save GitHub Actions minutes (macOS runners are 10x cost)
+  # Run tests locally before pushing or enable for important PRs only
+  # test:
+  #   name: Unit Tests
+  #   runs-on: macos-14
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Select Xcode version
+  #       run: sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
+  #
+  #     - name: Show Xcode version
+  #       run: xcodebuild -version
+  #
+  #     - name: Install xcbeautify
+  #       run: brew install xcbeautify
+  #
+  #     - name: Build and Test
+  #       run: |
+  #         xcodebuild clean test \
+  #           -scheme "${{ env.SCHEME }}" \
+  #           -configuration "${{ env.CONFIGURATION }}" \
+  #           -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  #           -enableCodeCoverage YES \
+  #           -derivedDataPath DerivedData \
+  #           | xcbeautify
+  #
+  #     - name: Upload code coverage
+  #       uses: codecov/codecov-action@v3
+  #       with:
+  #         files: ./DerivedData/Logs/Test/*.xcresult
+  #         fail_ci_if_error: false
 
-      - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
-
-      - name: Show Xcode version
-        run: xcodebuild -version
-
-      - name: Install xcbeautify
-        run: brew install xcbeautify
-
-      - name: Build and Test
-        run: |
-          xcodebuild clean test \
-            -scheme "${{ env.SCHEME }}" \
-            -configuration "${{ env.CONFIGURATION }}" \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-            -enableCodeCoverage YES \
-            -derivedDataPath DerivedData \
-            | xcbeautify
-
-      - name: Upload code coverage
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./DerivedData/Logs/Test/*.xcresult
-          fail_ci_if_error: false
-
-  build:
-    name: Build Check
-    runs-on: macos-14
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
-
-      - name: Build for Device
-        run: |
-          xcodebuild clean build \
-            -scheme "${{ env.SCHEME }}" \
-            -configuration "${{ env.CONFIGURATION }}" \
-            -destination generic/platform=iOS \
-            -derivedDataPath DerivedData \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            | xcbeautify
+  # Disabled to save GitHub Actions minutes
+  # build:
+  #   name: Build Check
+  #   runs-on: macos-14
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Select Xcode version
+  #       run: sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
+  #
+  #     - name: Build for Device
+  #       run: |
+  #         xcodebuild clean build \
+  #           -scheme "${{ env.SCHEME }}" \
+  #           -configuration "${{ env.CONFIGURATION }}" \
+  #           -destination generic/platform=iOS \
+  #           -derivedDataPath DerivedData \
+  #           CODE_SIGN_IDENTITY="" \
+  #           CODE_SIGNING_REQUIRED=NO \
+  #           CODE_SIGNING_ALLOWED=NO \
+  #           | xcbeautify
 
   security-audit:
     name: Security Audit

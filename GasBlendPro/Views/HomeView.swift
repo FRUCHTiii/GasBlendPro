@@ -19,6 +19,15 @@ struct HomeView: View {
                             )
                         }
 
+                        NavigationLink(destination: StorageTanksView()) {
+                            MenuCard(
+                                title: "Storage Tanks",
+                                subtitle: "Manage O₂ and He inventory",
+                                icon: "square.stack.3d.up.fill",
+                                color: .orange
+                            )
+                        }
+
                         NavigationLink(destination: SettingsView()) {
                             MenuCard(
                                 title: "Settings",

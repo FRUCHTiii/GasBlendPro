@@ -7,6 +7,20 @@ struct BlendingCalculatorView: View {
     @Query(sort: \GasPreset.createdAt)
     private var presets: [GasPreset]
     @Query private var settings: [AppSettings]
+    @Query(sort: \StorageTank.createdAt, order: .reverse)
+    private var allStorageTanks: [StorageTank]
+
+    private var storageTanks: [StorageTank] {
+        allStorageTanks.filter { $0.gasType == .oxygen || $0.gasType == .helium }
+    }
+
+    private var oxygenTanks: [StorageTank] {
+        allStorageTanks.filter { $0.gasType == .oxygen }
+    }
+
+    private var heliumTanks: [StorageTank] {
+        allStorageTanks.filter { $0.gasType == .helium }
+    }
 
     // Session persistence - survives navigation but not app restart
     @AppStorage("session.currentOxygen")
@@ -45,6 +59,10 @@ struct BlendingCalculatorView: View {
     @State private var isCurrentPresetManuallyChanged = false
     @State private var isTargetPresetManuallyChanged = false
     @State private var isInitialized = false
+    @State private var showOxygenTankPicker = false
+    @State private var showHeliumTankPicker = false
+    @State private var oxygenDeducted = false
+    @State private var heliumDeducted = false
 
     var body: some View {
         ZStack {
@@ -63,8 +81,16 @@ struct BlendingCalculatorView: View {
                             tankConfigCardView
 
                             if let result = blendingResult {
-                                resultsCardView(result)
-                                    .id("results")
+                                ResultsCard(
+                                    result: result,
+                                    currentPressure: currentPressure,
+                                    storageTanks: storageTanks,
+                                    showOxygenTankPicker: $showOxygenTankPicker,
+                                    showHeliumTankPicker: $showHeliumTankPicker,
+                                    oxygenDeducted: $oxygenDeducted,
+                                    heliumDeducted: $heliumDeducted
+                                )
+                                .id("results")
                             }
 
                             Spacer().frame(height: 12)
@@ -234,6 +260,28 @@ struct BlendingCalculatorView: View {
                 handleCurrentPresetChange(preset: preset)
             }
         }
+        .sheet(isPresented: $showOxygenTankPicker) {
+            if let result = blendingResult {
+                TankSelectionSheet(
+                    gasType: .oxygen,
+                    pressureNeeded: result.oxygenToAdd,
+                    tanks: oxygenTanks
+                ) {
+                    oxygenDeducted = true
+                }
+            }
+        }
+        .sheet(isPresented: $showHeliumTankPicker) {
+            if let result = blendingResult {
+                TankSelectionSheet(
+                    gasType: .helium,
+                    pressureNeeded: result.heliumToAdd,
+                    tanks: heliumTanks
+                ) {
+                    heliumDeducted = true
+                }
+            }
+        }
     }
 
     private var presetMenuView: some View {
@@ -322,162 +370,6 @@ struct BlendingCalculatorView: View {
         .cornerRadius(12)
     }
 
-    private func resultsCardView(_ result: BlendingResult) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Blending Steps")
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(.primary)
-
-            VStack(spacing: 12) {
-                // Calculate step numbers
-                let steps = calculateStepNumbers(for: result)
-                let releaseStep = steps.release
-                let heliumStep = steps.helium
-                let oxygenStep = steps.oxygen
-                let airStep = steps.air
-
-                // Release Air step (if needed)
-                if result.airToRelease > 0.01 {
-                    AppleResultRow(
-                        step: releaseStep,
-                        label: "Air",
-                        value: result.airToRelease,
-                        pressureRange: PressureRange(
-                            initial: currentPressure,
-                            final: result.pressureAfterRelease
-                        ),
-                        isRelease: true
-                    )
-                }
-
-                // Add Helium step (if needed)
-                if result.heliumToAdd > 0.01 {
-                    AppleResultRow(
-                        step: heliumStep,
-                        label: "Helium",
-                        value: result.heliumToAdd,
-                        pressureRange: PressureRange(
-                            initial: result.pressureAfterRelease,
-                            final: result.pressureAfterHelium
-                        ),
-                        isRelease: false
-                    )
-                }
-
-                // Add Oxygen step (if needed - only show if > 0.01)
-                if result.oxygenToAdd > 0.01 {
-                    let heliumAddition = result.heliumToAdd > 0.01 ? result.heliumToAdd : 0
-                    let o2InitialPressure = result.pressureAfterRelease + heliumAddition
-                    let o2FinalPressure = o2InitialPressure + result.oxygenToAdd
-                    AppleResultRow(
-                        step: oxygenStep,
-                        label: "Oxygen",
-                        value: result.oxygenToAdd,
-                        pressureRange: PressureRange(initial: o2InitialPressure, final: o2FinalPressure),
-                        isRelease: false
-                    )
-                }
-
-                // Add Air step
-                let heliumAddition = result.heliumToAdd > 0.01 ? result.heliumToAdd : 0
-                let oxygenAddition = result.oxygenToAdd > 0.01 ? result.oxygenToAdd : 0
-                let airInitialPressure = result.pressureAfterRelease + heliumAddition + oxygenAddition
-                AppleResultRow(
-                    step: airStep,
-                    label: "Air",
-                    value: result.airToAdd,
-                    pressureRange: PressureRange(
-                        initial: airInitialPressure,
-                        final: result.pressureAfterOxygen
-                    ),
-                    isRelease: false
-                )
-            }
-
-            finalMixView(result)
-
-            HStack(spacing: 12) {
-                oxygenVolumeView(result)
-                if result.heliumVolume > 0.01 {
-                    heliumVolumeView(result)
-                }
-            }
-        }
-        .padding(16)
-        .cardBackground()
-        .cornerRadius(12)
-    }
-
-    private func finalMixView(_ result: BlendingResult) -> some View {
-        VStack(spacing: 12) {
-            Text("Final Gas Mix")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(.secondary)
-
-            HStack(spacing: 0) {
-                AppleFinalMixComponent(label: "O₂", value: result.finalMix.oxygen, accentColor: .green)
-                Divider().frame(height: 40)
-
-                if result.finalMix.helium > 0.1 {
-                    AppleFinalMixComponent(label: "He", value: result.finalMix.helium, accentColor: .purple)
-                    Divider().frame(height: 40)
-                }
-
-                AppleFinalMixComponent(label: "N₂", value: result.finalMix.nitrogen, accentColor: .indigo)
-                Spacer()
-            }
-            .padding(12)
-            .background(Color(uiColor: .tertiarySystemFill))
-            .cornerRadius(8)
-        }
-    }
-
-    private func oxygenVolumeView(_ result: BlendingResult) -> some View {
-        let o2VolumeVal = result.oxygenVolume.isNaN || result.oxygenVolume.isInfinite ? 0 : result.oxygenVolume
-
-        return VStack(spacing: 8) {
-            VStack(alignment: .center, spacing: 4) {
-                Text("Oxygen")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.secondary)
-                Text(String(format: "%.2f L", o2VolumeVal))
-                    .font(.system(size: 18, weight: .bold, design: .default))
-                    .foregroundColor(.green)
-            }
-            Image(systemName: "drop.fill")
-                .font(.system(size: 20, weight: .light))
-                .foregroundColor(.green)
-                .opacity(0.3)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(12)
-        .cardBackground()
-        .cornerRadius(12)
-    }
-
-    private func heliumVolumeView(_ result: BlendingResult) -> some View {
-        let heVolumeVal = result.heliumVolume.isNaN || result.heliumVolume.isInfinite ? 0 : result.heliumVolume
-
-        return VStack(spacing: 8) {
-            VStack(alignment: .center, spacing: 4) {
-                Text("Helium")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.secondary)
-                Text(String(format: "%.2f L", heVolumeVal))
-                    .font(.system(size: 18, weight: .bold, design: .default))
-                    .foregroundColor(.purple)
-            }
-            Image(systemName: "balloon.fill")
-                .font(.system(size: 20, weight: .light))
-                .foregroundColor(.purple)
-                .opacity(0.3)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(12)
-        .cardBackground()
-        .cornerRadius(12)
-    }
-
     private var calculateButtonView: some View {
         Button(action: performCalculation) {
             Text("Calculate")
@@ -508,6 +400,8 @@ struct BlendingCalculatorView: View {
         // Clear previous error and result
         errorMessage = nil
         blendingResult = nil
+        oxygenDeducted = false
+        heliumDeducted = false
 
         // Validation checks
         if let error = validateInputs() {
@@ -750,144 +644,6 @@ struct BlendingCalculatorView: View {
         // Update presets
         checkAndUpdateCurrentPreset()
         checkAndUpdateTargetPreset()
-    }
-
-    private func calculateStepNumbers(for result: BlendingResult) -> BlendingStepNumbers {
-        let releaseStep = 1
-        var currentStep = releaseStep
-
-        if result.airToRelease > 0.01 {
-            currentStep += 1
-        }
-        let heliumStep = currentStep
-
-        if result.heliumToAdd > 0.01 {
-            currentStep += 1
-        }
-        let oxygenStep = currentStep
-
-        if result.oxygenToAdd > 0.01 {
-            currentStep += 1
-        }
-        let airStep = currentStep
-
-        return BlendingStepNumbers(
-            release: releaseStep,
-            helium: heliumStep,
-            oxygen: oxygenStep,
-            air: airStep
-        )
-    }
-}
-
-// MARK: - Blending Step Numbers
-struct BlendingStepNumbers {
-    let release: Int
-    let helium: Int
-    let oxygen: Int
-    let air: Int
-}
-
-// MARK: - Apple-style Input Field
-struct AppleInputField: View {
-    let label: String
-    @Binding var value: Double
-    let unit: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(label)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.secondary)
-
-            HStack(spacing: 0) {
-                TextField("0", value: $value, format: .number)
-                    .keyboardType(.decimalPad)
-                    .font(.system(size: 16, weight: .semibold, design: .default))
-                    .foregroundColor(.primary)
-
-                Text(unit)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.secondary)
-                    .padding(.trailing, 4)
-            }
-            .padding(10)
-            .background(Color(uiColor: .tertiarySystemFill))
-            .cornerRadius(8)
-        }
-    }
-}
-
-// MARK: - Pressure Range
-struct PressureRange {
-    let initial: Double
-    let final: Double
-}
-
-// MARK: - Apple-style Result Row
-struct AppleResultRow: View {
-    let step: Int
-    let label: String
-    let value: Double
-    let pressureRange: PressureRange
-    let isRelease: Bool
-
-    var body: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(Color.blue.opacity(0.2))
-                    .frame(width: 36, height: 36)
-
-                Text("\(step)")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.blue)
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                let val = value.isNaN ? 0 : value
-                let actionText = isRelease ? "Release" : "Add"
-                Text(String(format: "%@ %.2f bar of %@", actionText, val, label))
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.primary)
-
-                let initialPres = pressureRange.initial.isNaN ? 0 : pressureRange.initial
-                let finalPres = pressureRange.final.isNaN ? 0 : pressureRange.final
-                Text(String(format: "%.2f bar → %.2f bar", initialPres, finalPres))
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer()
-        }
-        .padding(12)
-        .background(Color(uiColor: .tertiarySystemFill))
-        .cornerRadius(10)
-    }
-}
-
-// MARK: - Apple Final Mix Component
-struct AppleFinalMixComponent: View {
-    let label: String
-    let value: Double
-    let accentColor: Color
-
-    var body: some View {
-        VStack(alignment: .center, spacing: 6) {
-            Text(label)
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(.secondary)
-
-            let val = value.isNaN ? 0 : value
-            Text(String(format: "%.1f", val))
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(accentColor)
-
-            Text("%")
-                .font(.system(size: 11, weight: .regular))
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity)
     }
 }
 

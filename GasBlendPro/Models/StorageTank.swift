@@ -9,6 +9,7 @@ final class StorageTank: Identifiable {
     var name: String
     var gasType: GasType // O2, He, or Air
     var currentPressure: Double // bar
+    var maxPressure: Double // bar (tank's rated maximum pressure)
     var tankVolume: Double // liters
     var purity: Double // percentage (0-100)
     var createdAt: Date
@@ -18,6 +19,7 @@ final class StorageTank: Identifiable {
         name: String,
         gasType: GasType,
         currentPressure: Double,
+        maxPressure: Double,
         tankVolume: Double,
         purity: Double = 100.0,
         createdAt: Date = Date()
@@ -26,9 +28,21 @@ final class StorageTank: Identifiable {
         self.name = name
         self.gasType = gasType
         self.currentPressure = currentPressure
+        self.maxPressure = maxPressure
         self.tankVolume = tankVolume
         self.purity = purity
         self.createdAt = createdAt
+    }
+
+    /// Calculate percentage of tank capacity used
+    var percentageFilled: Double {
+        guard maxPressure > 0 else { return 0 }
+        return (currentPressure / maxPressure) * 100.0
+    }
+
+    /// Check if tank has enough gas for the requested pressure
+    func hasEnoughGas(pressureNeeded: Double) -> Bool {
+        currentPressure >= pressureNeeded
     }
 
     /// Get the gas mix for this storage tank

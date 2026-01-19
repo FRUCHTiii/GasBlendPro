@@ -6,7 +6,7 @@ struct TankSelectionSheet: View {
     @Environment(\.dismiss)
     private var dismiss
     let gasType: GasType
-    let pressureNeeded: Double
+    let volumeNeeded: Double
     let tanks: [StorageTank]
     let onDeducted: () -> Void
 
@@ -16,7 +16,7 @@ struct TankSelectionSheet: View {
                 ForEach(tanks) { tank in
                     TankSelectionRow(
                         tank: tank,
-                        pressureNeeded: pressureNeeded
+                        volumeNeeded: volumeNeeded
                     ) {
                         useTank(tank)
                     }
@@ -35,7 +35,7 @@ struct TankSelectionSheet: View {
     }
 
     private func useTank(_ tank: StorageTank) {
-        tank.deductUsage(pressureUsed: pressureNeeded)
+        tank.deductUsage(volumeUsed: volumeNeeded)
         onDeducted()
         dismiss()
     }
@@ -43,11 +43,15 @@ struct TankSelectionSheet: View {
 
 struct TankSelectionRow: View {
     let tank: StorageTank
-    let pressureNeeded: Double
+    let volumeNeeded: Double
     let onSelect: () -> Void
 
     private var hasEnoughGas: Bool {
-        tank.hasEnoughGas(pressureNeeded: pressureNeeded)
+        tank.hasEnoughGas(volumeNeeded: volumeNeeded)
+    }
+
+    private var pressureNeeded: Double {
+        volumeNeeded / tank.tankVolume
     }
 
     private var remainingPressure: Double {

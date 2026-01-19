@@ -264,7 +264,7 @@ struct BlendingCalculatorView: View {
             if let result = blendingResult {
                 TankSelectionSheet(
                     gasType: .oxygen,
-                    pressureNeeded: result.oxygenToAdd,
+                    volumeNeeded: result.oxygenVolume,
                     tanks: oxygenTanks
                 ) {
                     oxygenDeducted = true
@@ -275,7 +275,7 @@ struct BlendingCalculatorView: View {
             if let result = blendingResult {
                 TankSelectionSheet(
                     gasType: .helium,
-                    pressureNeeded: result.heliumToAdd,
+                    volumeNeeded: result.heliumVolume,
                     tanks: heliumTanks
                 ) {
                     heliumDeducted = true

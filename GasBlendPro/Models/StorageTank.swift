@@ -40,9 +40,12 @@ final class StorageTank: Identifiable {
         return (currentPressure / maxPressure) * 100.0
     }
 
-    /// Check if tank has enough gas for the requested pressure
-    func hasEnoughGas(pressureNeeded: Double) -> Bool {
-        currentPressure >= pressureNeeded
+    /// Check if tank has enough gas for the requested volume
+    /// - Parameter volumeNeeded: Volume needed in liters (at 1 bar)
+    /// - Returns: True if tank has sufficient gas
+    func hasEnoughGas(volumeNeeded: Double) -> Bool {
+        let pressureNeeded = volumeNeeded / tankVolume
+        return currentPressure >= pressureNeeded
     }
 
     /// Get the gas mix for this storage tank
@@ -82,10 +85,13 @@ final class StorageTank: Identifiable {
         pressure * tankVolume
     }
 
-    /// Deduct used gas from tank
-    /// - Parameter pressureUsed: Pressure that was deducted
-    func deductUsage(pressureUsed: Double) {
-        currentPressure = max(0, currentPressure - pressureUsed)
+    /// Deduct used gas from tank based on volume consumed
+    /// - Parameter volumeUsed: Volume of gas consumed in liters (at 1 bar)
+    func deductUsage(volumeUsed: Double) {
+        // Convert volume to pressure change in this storage tank
+        // volumeUsed (liters) / tankVolume (liters) = pressure change (bar)
+        let pressureChange = volumeUsed / tankVolume
+        currentPressure = max(0, currentPressure - pressureChange)
     }
 }
 

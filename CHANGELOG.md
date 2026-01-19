@@ -15,6 +15,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Imperial units support (PSI, cubic feet)
 - Gradient factor integration
 - Multi-language support
+- Feature voting system
+
+---
+
+## [0.0.7] - 2025-01-19
+
+### Added
+- **Storage Tank Inventory Management**: Track oxygen and helium storage tanks
+  - Add/edit/delete storage tanks with volume, pressure, and purity tracking
+  - Automatic gas deduction from storage when blending
+  - Volume-based calculation: `pressureChange = volumeUsed / tankVolume`
+  - Multi-tank support for O₂ and He
+  - Storage tank list view with current fill levels
+- **Legal & Compliance**: Complete App Store-ready legal infrastructure
+  - Mandatory safety disclaimer on first launch (must accept to use app)
+  - Privacy policy (hosted on GitHub Pages)
+  - Terms of service with liability protection
+  - About section in Settings with app version, developer info
+  - Contact & feedback form integration (Tally.so)
+- **Input Field UX Improvement**: Select-all-on-tap for numeric inputs
+  - Tapping any input field automatically selects all text
+  - Enables quick value replacement without manual selection
+  - UITextField wrapper with `textFieldDidBeginEditing` delegate
+- **Dependabot Integration**: Automated dependency updates
+  - Monitors GitHub Actions versions
+  - Monitors Fastlane/Ruby dependencies
+  - Weekly update checks on Mondays
+  - Auto-labeled PRs with semantic commit messages
+
+### Changed
+- **Settings UI Enhancement**: Redesigned About section
+  - App version display from Bundle
+  - Developer information
+  - Multiple contact/feedback options
+  - View disclaimer button (re-triggers safety warning)
+  - Safety disclaimer footer
+- **Disclaimer Behavior**: Decline button exits app
+  - Changed from persistent nag to clean exit using `exit(0)`
+  - Prevents app use without explicit acceptance
+- **Storage Tank UI**: Completely redesigned to match blending calculator
+  - Card-based layout matching BlendingCalculatorView
+  - Consistent `AppleInputField` components
+  - Summary card with color-coded fill levels
+  - Better visual hierarchy and spacing
+
+### Fixed
+- **Storage Tank Calculation Bug**: Fixed incorrect pressure deduction
+  - Was subtracting destination tank pressure (wrong!)
+  - Now correctly calculates based on storage tank volume
+  - Example: 1400L from 50L tank = 28 bar deduction (not 200 bar)
+  - Updated `hasEnoughGas()` and `deductUsage()` methods
+  - Added comprehensive tests for volume-based calculations
+
+### Technical Improvements
+- **Export Compliance**: Added `ITSAppUsesNonExemptEncryption = false` to Info.plist
+  - Bypasses Apple's encryption export compliance questions
+  - App only uses standard iOS encryption (HTTPS, SwiftData)
+- **GitHub Pages Setup**: Created public repo for legal documents
+  - Responsive HTML pages with dark mode support
+  - Professional styling matching iOS design language
+  - Mobile-optimized layouts
+- **Gemfile Added**: Fastlane dependency tracking
+  - Enables Dependabot to monitor Fastlane versions
+  - Version: `fastlane ~> 2.219`
+- **Code Quality**: SwiftLint strict mode passes with 0 violations
+- **Test Coverage**: Added StorageTankTests with 30+ test cases
+  - Volume-based calculation tests
+  - User's specific example validated (1400L from 50L)
+  - Edge cases: empty tanks, multiple blends, small increments
+
+### Known Limitations
+- Cannot reduce O₂% while increasing pressure (requires full drain)
+- Cannot remove helium from existing mix
+- Top-up gas is always Air (21% O₂)
+- Storage tank purity tracking (no automated blend contamination calculation)
 
 ---
 

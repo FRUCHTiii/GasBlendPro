@@ -219,15 +219,16 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
 
-                    if let emailURL = URL(string: "mailto:support@werk4-services.de") {
-                        Link(destination: emailURL) {
+                    // General Contact
+                    if let contactURL = URL(string: "https://tally.so/r/LZKrL1") {
+                        Link(destination: contactURL) {
                             HStack {
                                 Image(systemName: "envelope")
                                     .font(.system(size: 20))
-                                    .foregroundColor(.green)
+                                    .foregroundColor(.blue)
                                     .frame(width: 28)
 
-                                Text("Contact Support")
+                                Text("Contact & Feedback")
                                     .font(.system(size: 17))
                                     .foregroundColor(.primary)
 

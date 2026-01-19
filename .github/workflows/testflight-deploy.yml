@@ -22,9 +22,12 @@ jobs:
       - name: Extract version from tag
         id: version
         run: |
-          TAG=${GITHUB_REF#refs/tags/v}
-          echo "version=$TAG" >> $GITHUB_OUTPUT
-          echo "Deploying version: $TAG"
+          # Extract tag from GITHUB_REF (e.g., refs/tags/v0.0.5)
+          TAG=${GITHUB_REF#refs/tags/}
+          # Remove 'v' prefix if present (v0.0.5 -> 0.0.5)
+          VERSION=${TAG#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Deploying version: $VERSION (from tag: $TAG)"
 
       - name: Select Xcode version
         run: sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
@@ -96,6 +99,10 @@ jobs:
           VERSION_NUMBER: ${{ steps.version.outputs.version }}
           PROVISIONING_PROFILE_SPECIFIER: ${{ env.PROFILE_UUID }}
         run: |
+          echo "🚀 Starting Fastlane deployment..."
+          echo "📦 VERSION_NUMBER: $VERSION_NUMBER"
+          echo "🔢 BUILD_NUMBER: $BUILD_NUMBER"
+          echo "📱 PROVISIONING_PROFILE_SPECIFIER: $PROVISIONING_PROFILE_SPECIFIER"
           fastlane beta
 
       - name: Upload IPA as artifact

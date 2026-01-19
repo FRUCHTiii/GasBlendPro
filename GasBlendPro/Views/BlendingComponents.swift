@@ -1,4 +1,59 @@
 import SwiftUI
+import UIKit
+
+// MARK: - UITextField Wrapper with Select All
+struct SelectAllTextField: UIViewRepresentable {
+    @Binding var value: Double
+    let placeholder: String
+
+    func makeUIView(context: Context) -> UITextField {
+        let textField = UITextField()
+        textField.keyboardType = .decimalPad
+        textField.font = .systemFont(ofSize: 16, weight: .semibold)
+        textField.placeholder = placeholder
+        textField.delegate = context.coordinator
+        textField.addTarget(
+            context.coordinator,
+            action: #selector(Coordinator.textFieldDidChange),
+            for: .editingChanged
+        )
+        return textField
+    }
+
+    func updateUIView(_ uiView: UITextField, context: Context) {
+        let formattedValue = value == 0 ? "" : String(format: "%.10g", value)
+        uiView.text = formattedValue
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(value: $value)
+    }
+
+    class Coordinator: NSObject, UITextFieldDelegate {
+        @Binding var value: Double
+
+        init(value: Binding<Double>) {
+            _value = value
+        }
+
+        @objc
+        func textFieldDidChange(_ textField: UITextField) {
+            if let text = textField.text, let newValue = Double(text) {
+                value = newValue
+            } else if textField.text?.isEmpty ?? true {
+                value = 0
+            }
+        }
+
+        // Select all text when user taps into the field
+        func textFieldDidBeginEditing(_ textField: UITextField) {
+            textField.selectedTextRange = textField.textRange(
+                from: textField.beginningOfDocument,
+                to: textField.endOfDocument
+            )
+        }
+    }
+}
 
 // MARK: - Apple-style Input Field
 struct AppleInputField: View {
@@ -13,10 +68,8 @@ struct AppleInputField: View {
                 .foregroundColor(.secondary)
 
             HStack(spacing: 0) {
-                TextField("0", value: $value, format: .number)
-                    .keyboardType(.decimalPad)
-                    .font(.system(size: 16, weight: .semibold, design: .default))
-                    .foregroundColor(.primary)
+                SelectAllTextField(value: $value, placeholder: "0")
+                    .frame(maxWidth: .infinity)
 
                 Text(unit)
                     .font(.system(size: 13, weight: .semibold))

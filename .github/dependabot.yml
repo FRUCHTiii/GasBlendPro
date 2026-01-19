@@ -1,0 +1,44 @@
+# Dependabot configuration for Gas Blend Pro
+# Documentation: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates
+
+version: 2
+updates:
+  # Monitor GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "FRUCHTiii"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # Monitor Fastlane (Ruby Gemfile if present)
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Berlin"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "FRUCHTiii"
+    labels:
+      - "dependencies"
+      - "fastlane"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    ignore:
+      # Fastlane is usually pinned for stability
+      - dependency-name: "fastlane"
+        update-types: ["version-update:semver-major"]

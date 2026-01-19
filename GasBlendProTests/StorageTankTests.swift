@@ -154,9 +154,9 @@ struct StorageTankTests {
         #expect(tank.percentageFilled == 0.0)
     }
 
-    // MARK: - hasEnoughGas Tests
+    // MARK: - hasEnoughGas Tests (Volume-Based)
 
-    @Test("hasEnoughGas - sufficient gas")
+    @Test("hasEnoughGas - sufficient gas (volume-based)")
     func testHasEnoughGasSufficient() throws {
         let tank = StorageTank(
             name: "Test Tank",
@@ -167,12 +167,13 @@ struct StorageTankTests {
             purity: 100.0
         )
 
-        #expect(tank.hasEnoughGas(pressureNeeded: 100))
-        #expect(tank.hasEnoughGas(pressureNeeded: 150))
-        #expect(tank.hasEnoughGas(pressureNeeded: 50))
+        // Tank has 150 bar × 50L = 7500L available
+        #expect(tank.hasEnoughGas(volumeNeeded: 5000)) // Needs 100 bar
+        #expect(tank.hasEnoughGas(volumeNeeded: 7500)) // Needs 150 bar (exactly enough)
+        #expect(tank.hasEnoughGas(volumeNeeded: 2500)) // Needs 50 bar
     }
 
-    @Test("hasEnoughGas - insufficient gas")
+    @Test("hasEnoughGas - insufficient gas (volume-based)")
     func testHasEnoughGasInsufficient() throws {
         let tank = StorageTank(
             name: "Test Tank",
@@ -183,12 +184,13 @@ struct StorageTankTests {
             purity: 100.0
         )
 
-        #expect(!tank.hasEnoughGas(pressureNeeded: 150))
-        #expect(!tank.hasEnoughGas(pressureNeeded: 200))
-        #expect(!tank.hasEnoughGas(pressureNeeded: 101))
+        // Tank has 100 bar × 50L = 5000L available
+        #expect(!tank.hasEnoughGas(volumeNeeded: 7500)) // Needs 150 bar
+        #expect(!tank.hasEnoughGas(volumeNeeded: 10000)) // Needs 200 bar
+        #expect(!tank.hasEnoughGas(volumeNeeded: 5050)) // Needs 101 bar
     }
 
-    @Test("hasEnoughGas - exactly enough")
+    @Test("hasEnoughGas - exactly enough (volume-based)")
     func testHasEnoughGasExact() throws {
         let tank = StorageTank(
             name: "Test Tank",
@@ -199,10 +201,11 @@ struct StorageTankTests {
             purity: 100.0
         )
 
-        #expect(tank.hasEnoughGas(pressureNeeded: 100))
+        // Tank has exactly 5000L (100 bar × 50L)
+        #expect(tank.hasEnoughGas(volumeNeeded: 5000))
     }
 
-    @Test("hasEnoughGas - empty tank")
+    @Test("hasEnoughGas - empty tank (volume-based)")
     func testHasEnoughGasEmpty() throws {
         let tank = StorageTank(
             name: "Test Tank",
@@ -213,13 +216,13 @@ struct StorageTankTests {
             purity: 100.0
         )
 
-        #expect(!tank.hasEnoughGas(pressureNeeded: 1))
-        #expect(tank.hasEnoughGas(pressureNeeded: 0))
+        #expect(!tank.hasEnoughGas(volumeNeeded: 50)) // Needs 1 bar
+        #expect(tank.hasEnoughGas(volumeNeeded: 0))
     }
 
-    // MARK: - deductUsage Tests
+    // MARK: - deductUsage Tests (Volume-Based)
 
-    @Test("deductUsage - normal deduction")
+    @Test("deductUsage - normal deduction (volume-based)")
     func testDeductUsageNormal() throws {
         let tank = StorageTank(
             name: "Test Tank",
@@ -230,14 +233,16 @@ struct StorageTankTests {
             purity: 100.0
         )
 
-        tank.deductUsage(pressureUsed: 50)
+        // Use 2500L (50 bar from 50L tank)
+        tank.deductUsage(volumeUsed: 2500)
         #expect(tank.currentPressure == 100)
 
-        tank.deductUsage(pressureUsed: 25)
+        // Use 1250L (25 bar from 50L tank)
+        tank.deductUsage(volumeUsed: 1250)
         #expect(tank.currentPressure == 75)
     }
 
-    @Test("deductUsage - to empty")
+    @Test("deductUsage - to empty (volume-based)")
     func testDeductUsageToEmpty() throws {
         let tank = StorageTank(
             name: "Test Tank",
@@ -248,11 +253,12 @@ struct StorageTankTests {
             purity: 100.0
         )
 
-        tank.deductUsage(pressureUsed: 100)
+        // Use all 5000L (100 bar × 50L)
+        tank.deductUsage(volumeUsed: 5000)
         #expect(tank.currentPressure == 0)
     }
 
-    @Test("deductUsage - prevents negative pressure")
+    @Test("deductUsage - prevents negative pressure (volume-based)")
     func testDeductUsagePreventsNegative() throws {
         let tank = StorageTank(
             name: "Test Tank",
@@ -263,11 +269,12 @@ struct StorageTankTests {
             purity: 100.0
         )
 
-        tank.deductUsage(pressureUsed: 100)
+        // Try to use 5000L but tank only has 2500L
+        tank.deductUsage(volumeUsed: 5000)
         #expect(tank.currentPressure == 0, "Pressure should not go negative")
     }
 
-    @Test("deductUsage - zero deduction")
+    @Test("deductUsage - zero deduction (volume-based)")
     func testDeductUsageZero() throws {
         let tank = StorageTank(
             name: "Test Tank",
@@ -278,11 +285,11 @@ struct StorageTankTests {
             purity: 100.0
         )
 
-        tank.deductUsage(pressureUsed: 0)
+        tank.deductUsage(volumeUsed: 0)
         #expect(tank.currentPressure == 150)
     }
 
-    @Test("deductUsage - small incremental deductions")
+    @Test("deductUsage - small incremental deductions (volume-based)")
     func testDeductUsageSmallIncrements() throws {
         let tank = StorageTank(
             name: "Test Tank",
@@ -293,11 +300,33 @@ struct StorageTankTests {
             purity: 100.0
         )
 
+        // Use 250L × 10 = 2500L total (50 bar from 50L tank)
         for _ in 1...10 {
-            tank.deductUsage(pressureUsed: 5)
+            tank.deductUsage(volumeUsed: 250)
         }
 
         #expect(tank.currentPressure == 150)
+    }
+
+    @Test("deductUsage - user's example: 1400L from 50L tank = 28 bar")
+    func testDeductUsageUserExample() throws {
+        // User's scenario: Fill 7L bottle with 200 bar = 1400L oxygen
+        // Storage tank: 50L oxygen tank
+        // Expected: 1400L / 50L = 28 bar deduction
+        let tank = StorageTank(
+            name: "O2 Storage",
+            gasType: .oxygen,
+            currentPressure: 200,
+            maxPressure: 300,
+            tankVolume: 50,
+            purity: 100.0
+        )
+
+        // Deduct 1400L of oxygen
+        tank.deductUsage(volumeUsed: 1400)
+
+        // Should reduce by 28 bar (1400L / 50L)
+        #expect(abs(tank.currentPressure - 172.0) < tolerance, "Expected 200 - 28 = 172 bar")
     }
 
     // MARK: - Purity Tests
@@ -402,9 +431,10 @@ struct StorageTankTests {
         )
 
         #expect(abs(tank.percentageFilled - 90.0) < tolerance)
-        #expect(tank.hasEnoughGas(pressureNeeded: 28)) // Typical EAN32 blend from empty
+        // Typical EAN32 blend needs ~280L (28 bar × 10L tank)
+        #expect(tank.hasEnoughGas(volumeNeeded: 280))
 
-        tank.deductUsage(pressureUsed: 28)
+        tank.deductUsage(volumeUsed: 280) // 280L / 10L = 28 bar
         #expect(tank.currentPressure == 152)
         #expect(abs(tank.percentageFilled - 76.0) < tolerance)
     }
@@ -421,9 +451,10 @@ struct StorageTankTests {
         )
 
         #expect(abs(tank.percentageFilled - 83.33) < 0.1)
-        #expect(tank.hasEnoughGas(pressureNeeded: 90)) // Typical trimix blend
+        // Typical trimix blend needs 7200L (90 bar × 80L tank)
+        #expect(tank.hasEnoughGas(volumeNeeded: 7200))
 
-        tank.deductUsage(pressureUsed: 90)
+        tank.deductUsage(volumeUsed: 7200) // 7200L / 80L = 90 bar
         #expect(tank.currentPressure == 160)
         #expect(abs(tank.percentageFilled - 53.33) < 0.1)
     }
@@ -439,29 +470,29 @@ struct StorageTankTests {
             purity: 99.5
         )
 
-        // First blend - EAN32
-        #expect(tank.hasEnoughGas(pressureNeeded: 28))
-        tank.deductUsage(pressureUsed: 28)
+        // First blend - EAN32 (1400L = 28 bar × 50L)
+        #expect(tank.hasEnoughGas(volumeNeeded: 1400))
+        tank.deductUsage(volumeUsed: 1400)
         #expect(tank.currentPressure == 172)
 
-        // Second blend - EAN32
-        #expect(tank.hasEnoughGas(pressureNeeded: 28))
-        tank.deductUsage(pressureUsed: 28)
+        // Second blend - EAN32 (1400L)
+        #expect(tank.hasEnoughGas(volumeNeeded: 1400))
+        tank.deductUsage(volumeUsed: 1400)
         #expect(tank.currentPressure == 144)
 
-        // Third blend - EAN36
-        #expect(tank.hasEnoughGas(pressureNeeded: 38))
-        tank.deductUsage(pressureUsed: 38)
+        // Third blend - EAN36 (1900L = 38 bar × 50L)
+        #expect(tank.hasEnoughGas(volumeNeeded: 1900))
+        tank.deductUsage(volumeUsed: 1900)
         #expect(tank.currentPressure == 106)
 
-        // Fourth blend - EAN32
-        #expect(tank.hasEnoughGas(pressureNeeded: 28))
-        tank.deductUsage(pressureUsed: 28)
+        // Fourth blend - EAN32 (1400L)
+        #expect(tank.hasEnoughGas(volumeNeeded: 1400))
+        tank.deductUsage(volumeUsed: 1400)
         #expect(tank.currentPressure == 78)
 
         // Fifth blend attempt - should still have enough
-        #expect(tank.hasEnoughGas(pressureNeeded: 28))
-        tank.deductUsage(pressureUsed: 28)
+        #expect(tank.hasEnoughGas(volumeNeeded: 1400))
+        tank.deductUsage(volumeUsed: 1400)
         #expect(tank.currentPressure == 50)
 
         // Still has 25% left
@@ -482,16 +513,16 @@ struct StorageTankTests {
         // Only 15% full
         #expect(abs(tank.percentageFilled - 15.0) < tolerance)
 
-        // Can still do one small blend
-        #expect(tank.hasEnoughGas(pressureNeeded: 28))
-        #expect(!tank.hasEnoughGas(pressureNeeded: 35))
+        // Can still do one small blend (1400L = 28 bar × 50L)
+        #expect(tank.hasEnoughGas(volumeNeeded: 1400))
+        #expect(!tank.hasEnoughGas(volumeNeeded: 1750)) // 35 bar × 50L
 
-        tank.deductUsage(pressureUsed: 28)
+        tank.deductUsage(volumeUsed: 1400)
         #expect(tank.currentPressure == 2)
 
         // Now critically low - only 1% full
         #expect(tank.percentageFilled < 2.0)
-        #expect(!tank.hasEnoughGas(pressureNeeded: 28))
+        #expect(!tank.hasEnoughGas(volumeNeeded: 1400))
     }
 
     // MARK: - Edge Cases
@@ -508,9 +539,10 @@ struct StorageTankTests {
         )
 
         #expect(abs(tank.percentageFilled - 75.0) < tolerance)
-        #expect(tank.hasEnoughGas(pressureNeeded: 250))
+        // 50000L = 250 bar × 200L
+        #expect(tank.hasEnoughGas(volumeNeeded: 50000))
 
-        tank.deductUsage(pressureUsed: 100)
+        tank.deductUsage(volumeUsed: 20000) // 20000L / 200L = 100 bar
         #expect(tank.currentPressure == 200)
         #expect(abs(tank.percentageFilled - 50.0) < tolerance)
     }
@@ -527,9 +559,10 @@ struct StorageTankTests {
         )
 
         #expect(abs(tank.percentageFilled - 50.0) < tolerance)
-        #expect(tank.hasEnoughGas(pressureNeeded: 25))
+        // 25L = 25 bar × 1L
+        #expect(tank.hasEnoughGas(volumeNeeded: 25))
 
-        tank.deductUsage(pressureUsed: 25)
+        tank.deductUsage(volumeUsed: 25) // 25L / 1L = 25 bar
         #expect(tank.currentPressure == 25)
         #expect(abs(tank.percentageFilled - 25.0) < tolerance)
     }
@@ -547,7 +580,7 @@ struct StorageTankTests {
 
         #expect(abs(tank.percentageFilled - 78.06) < 0.1)
 
-        tank.deductUsage(pressureUsed: 27.8)
+        tank.deductUsage(volumeUsed: 1390) // 1390L / 50L = 27.8 bar
         #expect(abs(tank.currentPressure - 129.5) < tolerance)
     }
 

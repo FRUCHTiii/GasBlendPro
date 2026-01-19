@@ -13,36 +13,8 @@ platform :ios do
       is_key_content_base64: true
     )
 
-    # Extract version from git tag or use environment variable
-    version = ENV["VERSION_NUMBER"]
-    if version.nil? || version.empty?
-      # Fallback: extract from git tag
-      git_tag = sh("git describe --abbrev=0 --tags 2>/dev/null || echo ''").strip
-      version = git_tag.sub(/^v/, '') # Remove 'v' prefix if present
-      UI.message("📦 Extracted version from git tag: #{version}")
-    else
-      UI.message("📦 Using VERSION_NUMBER from environment: #{version}")
-    end
-
-    # Validate version format
-    unless version.match?(/^\d+\.\d+\.\d+$/)
-      UI.user_error!("❌ Invalid version format: '#{version}'. Expected format: X.Y.Z (e.g., 0.0.4)")
-    end
-
-    # Increment build number
-    increment_build_number(
-      build_number: ENV["BUILD_NUMBER"],
-      xcodeproj: "GasBlendPro.xcodeproj"
-    )
-
-    # Update version number from git tag
-    UI.message("🔢 Setting version to: #{version}")
-    increment_version_number(
-      version_number: version,
-      xcodeproj: "GasBlendPro.xcodeproj"
-    )
-
     # Build the app
+    # Note: Version and build number should be set manually in Xcode before tagging
     build_app(
       scheme: "GasBlendPro",
       configuration: "Release",

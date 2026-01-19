@@ -48,6 +48,9 @@ class AppSettings {
     var defaultTargetHelium: Double = 0.0
     var defaultTargetPressure: Double = 200.0
 
+    // Disclaimer acceptance
+    var hasAcceptedDisclaimer: Bool = false
+
     var lastModified: Date
 
     init(

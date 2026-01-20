@@ -214,7 +214,7 @@ struct SettingsView: View {
 
                         Spacer()
 
-                        Text("werk4-services")
+                        Text("Johannes Six")
                             .font(.system(size: 17))
                             .foregroundColor(.secondary)
                     }

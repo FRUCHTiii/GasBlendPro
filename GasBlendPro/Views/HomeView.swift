@@ -65,10 +65,6 @@ struct HomeView: View {
             Text("Gas Blend Pro")
                 .font(.system(size: 32, weight: .bold, design: .default))
                 .tracking(-0.5)
-
-            Text("by Werk4")
-                .font(.system(size: 15, weight: .regular, design: .default))
-                .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)

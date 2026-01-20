@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Feature voting system
 
 ---
+## [0.0.9] - 2025-01-20
+
+### Added
+- **Use a new icon**
+
 ## [0.0.8] - 2025-01-20
 
 ### Added

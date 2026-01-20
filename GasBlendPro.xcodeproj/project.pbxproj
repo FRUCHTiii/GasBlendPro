@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E0BA52852EBDE93D002A58A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E0BA52842EBDE93D002A58A0 /* Assets.xcassets */; };
+		E0C9BE412F1FE1D900DEBF26 /* gbp.icon in Resources */ = {isa = PBXBuildFile; fileRef = E0C9BE402F1FE1D900DEBF26 /* gbp.icon */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,7 +32,7 @@
 		E0BA52022EBB7D71002A58A0 /* GasBlendPro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GasBlendPro.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E0BA52162EBB7D72002A58A0 /* GasBlendProTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GasBlendProTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E0BA52202EBB7D72002A58A0 /* GasBlendProUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GasBlendProUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		E0BA52842EBDE93D002A58A0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E0C9BE402F1FE1D900DEBF26 /* gbp.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = gbp.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -93,7 +93,7 @@
 				E0BA52192EBB7D72002A58A0 /* GasBlendProTests */,
 				E0BA52232EBB7D72002A58A0 /* GasBlendProUITests */,
 				E0BA52032EBB7D71002A58A0 /* Products */,
-				E0BA52842EBDE93D002A58A0 /* Assets.xcassets */,
+				E0C9BE402F1FE1D900DEBF26 /* gbp.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -218,7 +218,7 @@
 		E0BA52002EBB7D71002A58A0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
-				E0BA52852EBDE93D002A58A0 /* Assets.xcassets in Resources */,
+				E0C9BE412F1FE1D900DEBF26 /* gbp.icon in Resources */,
 			);
 		};
 		E0BA52142EBB7D72002A58A0 /* Resources */ = {
@@ -268,8 +268,9 @@
 		E0BA522A2EBB7D72002A58A0 /* Debug configuration for PBXNativeTarget "GasBlendPro" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = gbp;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = GasBlendPro/GasBlendPro.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -289,7 +290,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.8;
+				MARKETING_VERSION = 0.0.9;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.werk4-services.GasBlendPro";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -301,8 +302,9 @@
 		E0BA522B2EBB7D72002A58A0 /* Release configuration for PBXNativeTarget "GasBlendPro" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = gbp;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = GasBlendPro/GasBlendPro.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -322,7 +324,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.8;
+				MARKETING_VERSION = 0.0.9;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.werk4-services.GasBlendPro";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

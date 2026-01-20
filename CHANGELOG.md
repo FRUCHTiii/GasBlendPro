@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- App Store release
 - Additional preset gas mixes
 - Imperial units support (PSI, cubic feet)
 - Gradient factor integration
@@ -18,6 +17,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Feature voting system
 
 ---
+
+## [1.0.0] - 2026-01-20
+
+### 🎉 First Public Release
+
+Gas Blend Pro v1.0.0 marks the official App Store release! This version includes all core features needed for professional gas blending with a focus on safety, accuracy, and user experience.
+
+### Added
+- **Complete App Store Compliance**
+  - Privacy policy (hosted on custom domain: gbp.werk4-diving.de)
+  - Terms of service with comprehensive liability protection
+  - User contact & feedback system (Tally.so integration)
+  - Export compliance declaration
+- **Professional Branding**
+  - Cleaned up main menu (removed subtitle)
+  - Updated About section with developer name
+  - Custom domain for legal documents
+
+### Changed
+- **UI Polish**
+  - Simplified header design
+  - Professional developer attribution: "Johannes Six"
+  - Consistent branding throughout app
+
+### Summary of Features (v1.0.0)
+
+**Core Functionality:**
+- Partial pressure gas blending calculator (Nitrox, Trimix)
+- Storage tank inventory management with automatic deduction
+- Preset gas mixes for common diving blends
+- Session persistence with reset capability
+- Real-time input validation and safety checks
+
+**Technical Quality:**
+- 173+ comprehensive unit tests
+- SwiftLint strict mode compliant (0 violations)
+- Dark mode support
+- iOS 18.1+ compatibility
+- Built with Xcode 16.2+
+
+**Safety Features:**
+- Mandatory safety disclaimer on first launch
+- Multi-layer input validation
+- Clear error messages
+- Volume-based tank calculations
+- Prevention of physically impossible blends
+
+**User Support:**
+- Privacy-first design (zero data collection)
+- Feedback form integration
+- Comprehensive legal documentation
+- Professional support infrastructure
+
+---
+
 ## [0.0.9] - 2025-01-20
 
 ### Added

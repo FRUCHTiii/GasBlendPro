@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 90;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -69,24 +69,18 @@
 /* Begin PBXFrameworksBuildPhase section */
 		E0BA51FF2EBB7D71002A58A0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E0BA52132EBB7D72002A58A0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E0BA521D2EBB7D72002A58A0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -126,14 +120,10 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				E0BA52042EBB7D71002A58A0 /* GasBlendPro */,
 			);
 			name = GasBlendPro;
-			packageProductDependencies = (
-			);
 			productName = GasBlendPro;
 			productReference = E0BA52022EBB7D71002A58A0 /* GasBlendPro.app */;
 			productType = "com.apple.product-type.application";
@@ -155,8 +145,6 @@
 				E0BA52192EBB7D72002A58A0 /* GasBlendProTests */,
 			);
 			name = GasBlendProTests;
-			packageProductDependencies = (
-			);
 			productName = GasBlendProTests;
 			productReference = E0BA52162EBB7D72002A58A0 /* GasBlendProTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -178,8 +166,6 @@
 				E0BA52232EBB7D72002A58A0 /* GasBlendProUITests */,
 			);
 			name = GasBlendProUITests;
-			packageProductDependencies = (
-			);
 			productName = GasBlendProUITests;
 			productReference = E0BA52202EBB7D72002A58A0 /* GasBlendProUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -192,7 +178,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1620;
-				LastUpgradeCheck = 1620;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					E0BA52012EBB7D71002A58A0 = {
 						CreatedOnToolsVersion = 16.2;
@@ -216,7 +202,7 @@
 			);
 			mainGroup = E0BA51F92EBB7D70002A58A0;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 90;
 			productRefGroup = E0BA52032EBB7D71002A58A0 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -231,49 +217,37 @@
 /* Begin PBXResourcesBuildPhase section */
 		E0BA52002EBB7D71002A58A0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				E0BA52852EBDE93D002A58A0 /* Assets.xcassets in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E0BA52142EBB7D72002A58A0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E0BA521E2EBB7D72002A58A0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		E0BA51FE2EBB7D71002A58A0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E0BA52122EBB7D72002A58A0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		E0BA521C2EBB7D72002A58A0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -291,7 +265,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		E0BA522A2EBB7D72002A58A0 /* Debug */ = {
+		E0BA522A2EBB7D72002A58A0 /* Debug configuration for PBXNativeTarget "GasBlendPro" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -315,16 +289,16 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.7;
+				MARKETING_VERSION = 0.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.werk4-services.GasBlendPro";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
-		E0BA522B2EBB7D72002A58A0 /* Release */ = {
+		E0BA522B2EBB7D72002A58A0 /* Release configuration for PBXNativeTarget "GasBlendPro" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -348,16 +322,16 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.0.7;
+				MARKETING_VERSION = 0.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.werk4-services.GasBlendPro";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
-		E0BA522C2EBB7D72002A58A0 /* Debug */ = {
+		E0BA522C2EBB7D72002A58A0 /* Debug configuration for PBXProject "GasBlendPro" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -415,12 +389,13 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		E0BA522D2EBB7D72002A58A0 /* Release */ = {
+		E0BA522D2EBB7D72002A58A0 /* Release configuration for PBXProject "GasBlendPro" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -471,12 +446,13 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		E0BA522F2EBB7D72002A58A0 /* Debug */ = {
+		E0BA522F2EBB7D72002A58A0 /* Debug configuration for PBXNativeTarget "GasBlendProTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -494,7 +470,7 @@
 			};
 			name = Debug;
 		};
-		E0BA52302EBB7D72002A58A0 /* Release */ = {
+		E0BA52302EBB7D72002A58A0 /* Release configuration for PBXNativeTarget "GasBlendProTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -512,7 +488,7 @@
 			};
 			name = Release;
 		};
-		E0BA52322EBB7D72002A58A0 /* Debug */ = {
+		E0BA52322EBB7D72002A58A0 /* Debug configuration for PBXNativeTarget "GasBlendProUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -528,7 +504,7 @@
 			};
 			name = Debug;
 		};
-		E0BA52332EBB7D72002A58A0 /* Release */ = {
+		E0BA52332EBB7D72002A58A0 /* Release configuration for PBXNativeTarget "GasBlendProUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -550,37 +526,33 @@
 		E0BA51FD2EBB7D70002A58A0 /* Build configuration list for PBXProject "GasBlendPro" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E0BA522C2EBB7D72002A58A0 /* Debug */,
-				E0BA522D2EBB7D72002A58A0 /* Release */,
+				E0BA522C2EBB7D72002A58A0 /* Debug configuration for PBXProject "GasBlendPro" */,
+				E0BA522D2EBB7D72002A58A0 /* Release configuration for PBXProject "GasBlendPro" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		E0BA52292EBB7D72002A58A0 /* Build configuration list for PBXNativeTarget "GasBlendPro" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E0BA522A2EBB7D72002A58A0 /* Debug */,
-				E0BA522B2EBB7D72002A58A0 /* Release */,
+				E0BA522A2EBB7D72002A58A0 /* Debug configuration for PBXNativeTarget "GasBlendPro" */,
+				E0BA522B2EBB7D72002A58A0 /* Release configuration for PBXNativeTarget "GasBlendPro" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		E0BA522E2EBB7D72002A58A0 /* Build configuration list for PBXNativeTarget "GasBlendProTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E0BA522F2EBB7D72002A58A0 /* Debug */,
-				E0BA52302EBB7D72002A58A0 /* Release */,
+				E0BA522F2EBB7D72002A58A0 /* Debug configuration for PBXNativeTarget "GasBlendProTests" */,
+				E0BA52302EBB7D72002A58A0 /* Release configuration for PBXNativeTarget "GasBlendProTests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		E0BA52312EBB7D72002A58A0 /* Build configuration list for PBXNativeTarget "GasBlendProUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E0BA52322EBB7D72002A58A0 /* Debug */,
-				E0BA52332EBB7D72002A58A0 /* Release */,
+				E0BA52322EBB7D72002A58A0 /* Debug configuration for PBXNativeTarget "GasBlendProUITests" */,
+				E0BA52332EBB7D72002A58A0 /* Release configuration for PBXNativeTarget "GasBlendProUITests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */

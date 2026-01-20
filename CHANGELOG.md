@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Feature voting system
 
 ---
+## [0.0.8] - 2025-01-20
+
+### Added
+- **Updated to XCode 16.3**
 
 ## [0.0.7] - 2025-01-19
 

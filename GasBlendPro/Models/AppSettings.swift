@@ -51,6 +51,10 @@ class AppSettings {
     // Disclaimer acceptance
     var hasAcceptedDisclaimer: Bool = false
 
+    // Real gas correction temperature (Celsius)
+    // Default: 20°C (standard dive shop conditions)
+    var gasTemperature: Double = 20.0
+
     var lastModified: Date
 
     init(
@@ -60,7 +64,8 @@ class AppSettings {
         defaultCurrentHelium: Double = 0.0,
         defaultTargetOxygen: Double = 32.0,
         defaultTargetHelium: Double = 0.0,
-        defaultTargetPressure: Double = 200.0
+        defaultTargetPressure: Double = 200.0,
+        gasTemperature: Double = 20.0
     ) {
         self.id = UUID()
         self.topUpGasRawValue = topUpGas.rawValue
@@ -70,6 +75,7 @@ class AppSettings {
         self.defaultTargetOxygen = defaultTargetOxygen
         self.defaultTargetHelium = defaultTargetHelium
         self.defaultTargetPressure = defaultTargetPressure
+        self.gasTemperature = gasTemperature
         self.lastModified = Date()
     }
 

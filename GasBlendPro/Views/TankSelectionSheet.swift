@@ -5,10 +5,20 @@ import SwiftData
 struct TankSelectionSheet: View {
     @Environment(\.dismiss)
     private var dismiss
+
+    @Environment(\.modelContext)
+    private var modelContext
+
+    @Query private var appSettingsList: [AppSettings]
+
     let gasType: GasType
     let volumeNeeded: Double
     let tanks: [StorageTank]
     let onDeducted: () -> Void
+
+    private var appSettings: AppSettings? {
+        appSettingsList.first
+    }
 
     var body: some View {
         NavigationView {
@@ -16,10 +26,12 @@ struct TankSelectionSheet: View {
                 ForEach(tanks) { tank in
                     TankSelectionRow(
                         tank: tank,
-                        volumeNeeded: volumeNeeded
+                        volumeNeeded: volumeNeeded,
+                        temperature: appSettings?.gasTemperature ?? 20.0
                     ) {
                         useTank(tank)
                     }
+                    .id("\(tank.id)-\(appSettings?.gasTemperature ?? 20.0)")
                 }
             }
             .navigationTitle("Select \(gasType.rawValue) Tank")
@@ -35,7 +47,8 @@ struct TankSelectionSheet: View {
     }
 
     private func useTank(_ tank: StorageTank) {
-        tank.deductUsage(volumeUsed: volumeNeeded)
+        let temperature = appSettings?.gasTemperature ?? 20.0
+        tank.deductUsage(volumeUsed: volumeNeeded, temperature: temperature)
         onDeducted()
         dismiss()
     }
@@ -44,14 +57,21 @@ struct TankSelectionSheet: View {
 struct TankSelectionRow: View {
     let tank: StorageTank
     let volumeNeeded: Double
+    let temperature: Double
     let onSelect: () -> Void
 
     private var hasEnoughGas: Bool {
-        tank.hasEnoughGas(volumeNeeded: volumeNeeded)
+        tank.hasEnoughGas(volumeNeeded: volumeNeeded, temperature: temperature)
     }
 
     private var pressureNeeded: Double {
-        volumeNeeded / tank.tankVolume
+        RealGasCorrection.pressureDeduction(
+            volumeNeeded: volumeNeeded,
+            storageTankVolume: tank.tankVolume,
+            storageTankPressure: tank.currentPressure,
+            gasType: tank.gasType,
+            temperature: temperature
+        )
     }
 
     private var remainingPressure: Double {

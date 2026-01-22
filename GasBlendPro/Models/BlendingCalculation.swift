@@ -51,10 +51,10 @@ struct BlendingResult: Codable, Equatable {
     /// Air pressure to add (bar)
     let airToAdd: Double
 
-    /// Oxygen volume used (liters)
+    /// Oxygen volume used (liters) - using ideal gas law
     let oxygenVolume: Double
 
-    /// Helium volume used (liters)
+    /// Helium volume used (liters) - using ideal gas law
     let heliumVolume: Double
 
     /// Intermediate pressure after adding helium (bar)
@@ -78,6 +78,28 @@ struct BlendingResult: Codable, Equatable {
     var isValid: Bool {
         // All gas amounts must be non-negative (physically impossible to add negative gas)
         oxygenToAdd >= 0 && airToAdd >= 0 && heliumToAdd >= 0
+    }
+
+    /// Calculate real oxygen volume from storage tank accounting for compressibility
+    /// - Parameter storagePressure: Current pressure in the oxygen storage tank (bar)
+    /// - Returns: Real volume needed from storage tank (liters)
+    func realOxygenVolume(storagePressure: Double) -> Double {
+        RealGasCorrection.realVolume(
+            fromIdeal: oxygenVolume,
+            gasType: .oxygen,
+            pressure: storagePressure
+        )
+    }
+
+    /// Calculate real helium volume from storage tank accounting for compressibility
+    /// - Parameter storagePressure: Current pressure in the helium storage tank (bar)
+    /// - Returns: Real volume needed from storage tank (liters)
+    func realHeliumVolume(storagePressure: Double) -> Double {
+        RealGasCorrection.realVolume(
+            fromIdeal: heliumVolume,
+            gasType: .helium,
+            pressure: storagePressure
+        )
     }
 }
 

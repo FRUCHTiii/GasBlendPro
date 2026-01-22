@@ -41,10 +41,18 @@ final class StorageTank: Identifiable {
     }
 
     /// Check if tank has enough gas for the requested volume
-    /// - Parameter volumeNeeded: Volume needed in liters (at 1 bar)
+    /// - Parameters:
+    ///   - volumeNeeded: Volume needed in liters (at 1 bar)
+    ///   - temperature: Gas temperature in Celsius (default: 20°C)
     /// - Returns: True if tank has sufficient gas
-    func hasEnoughGas(volumeNeeded: Double) -> Bool {
-        let pressureNeeded = volumeNeeded / tankVolume
+    func hasEnoughGas(volumeNeeded: Double, temperature: Double = 20.0) -> Bool {
+        let pressureNeeded = RealGasCorrection.pressureDeduction(
+            volumeNeeded: volumeNeeded,
+            storageTankVolume: tankVolume,
+            storageTankPressure: currentPressure,
+            gasType: gasType,
+            temperature: temperature
+        )
         return currentPressure >= pressureNeeded
     }
 
@@ -85,12 +93,19 @@ final class StorageTank: Identifiable {
         pressure * tankVolume
     }
 
-    /// Deduct used gas from tank based on volume consumed
-    /// - Parameter volumeUsed: Volume of gas consumed in liters (at 1 bar)
-    func deductUsage(volumeUsed: Double) {
-        // Convert volume to pressure change in this storage tank
-        // volumeUsed (liters) / tankVolume (liters) = pressure change (bar)
-        let pressureChange = volumeUsed / tankVolume
+    /// Deduct used gas from tank based on volume consumed (with real gas correction)
+    /// - Parameters:
+    ///   - volumeUsed: Volume of gas consumed in liters (at 1 bar)
+    ///   - temperature: Gas temperature in Celsius (default: 20°C)
+    func deductUsage(volumeUsed: Double, temperature: Double = 20.0) {
+        // Use real gas correction for accurate pressure deduction
+        let pressureChange = RealGasCorrection.pressureDeduction(
+            volumeNeeded: volumeUsed,
+            storageTankVolume: tankVolume,
+            storageTankPressure: currentPressure,
+            gasType: gasType,
+            temperature: temperature
+        )
         currentPressure = max(0, currentPressure - pressureChange)
     }
 }

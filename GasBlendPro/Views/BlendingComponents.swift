@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import UIKit
 
 // MARK: - UITextField Wrapper with Select All
@@ -97,6 +98,16 @@ struct AppleResultRow: View {
     let pressureRange: PressureRange
     let isRelease: Bool
 
+    @Query private var appSettingsList: [AppSettings]
+
+    private var appSettings: AppSettings? {
+        appSettingsList.first
+    }
+
+    private var pressureUnit: PressureUnit {
+        appSettings?.pressureUnit ?? .bar
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             ZStack {
@@ -112,15 +123,35 @@ struct AppleResultRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 let val = value.isNaN ? 0 : value
                 let actionText = isRelease ? "Release" : "Add"
-                Text(String(format: "%@ %.2f bar of %@", actionText, val, label))
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.primary)
+                let convertedVal = UnitConversion.pressure(fromBar: val, to: pressureUnit)
+                let precision = pressureUnit == .psi ? 0 : 2
+                Text(
+                    String(
+                        format: "%@ %.\(precision)f %@ of %@",
+                        actionText,
+                        convertedVal,
+                        pressureUnit.symbol,
+                        label
+                    )
+                )
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(.primary)
 
                 let initialPres = pressureRange.initial.isNaN ? 0 : pressureRange.initial
                 let finalPres = pressureRange.final.isNaN ? 0 : pressureRange.final
-                Text(String(format: "%.2f bar → %.2f bar", initialPres, finalPres))
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(.secondary)
+                let convertedInitial = UnitConversion.pressure(fromBar: initialPres, to: pressureUnit)
+                let convertedFinal = UnitConversion.pressure(fromBar: finalPres, to: pressureUnit)
+                Text(
+                    String(
+                        format: "%.\(precision)f %@ → %.\(precision)f %@",
+                        convertedInitial,
+                        pressureUnit.symbol,
+                        convertedFinal,
+                        pressureUnit.symbol
+                    )
+                )
+                .font(.system(size: 13, weight: .regular))
+                .foregroundColor(.secondary)
             }
 
             Spacer()

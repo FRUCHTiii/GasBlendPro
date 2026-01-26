@@ -11,11 +11,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 - Additional preset gas mixes
-- Imperial units support (PSI, cubic feet)
+- Cubic feet volume units
 - Gradient factor integration
 - Multi-language support
 - Feature voting system
 - UI display of real vs ideal gas comparison
+
+---
+
+## [1.2.0] - 2026-01-26
+
+### 🌍 Imperial Units Support
+
+This release adds comprehensive support for imperial units, allowing users in the US and other regions to work with PSI and Fahrenheit throughout the app.
+
+### Added
+- **Unit System Support** (UnitConversion.swift)
+  - Pressure unit conversion (Bar ↔ PSI)
+  - Temperature unit conversion (Celsius ↔ Fahrenheit)
+  - Conversion factor: 1 bar = 14.5038 PSI
+  - Helper methods for formatting with appropriate precision
+
+- **Unit Preferences** (Settings → General)
+  - Pressure Unit selector (Bar / PSI)
+  - Temperature Unit selector (Celsius / Fahrenheit)
+  - Settings persist across app sessions
+  - All pressure displays automatically update when unit changes
+
+- **Comprehensive Testing** (UnitConversionTests.swift)
+  - 19 unit tests covering all conversion scenarios
+  - Round-trip conversion tests (ensures no precision loss)
+  - Real-world diving pressure tests (200 bar, 3000 PSI, etc.)
+  - Temperature conversion accuracy tests
+  - Formatting helper tests
+
+### Changed
+- **All Pressure Displays** - Now respect user's preferred pressure unit:
+  - Blending Calculator: Current & Target pressure fields
+  - Blending Results: All pressure steps and ranges
+  - Storage Tanks: Tank list view pressures
+  - Tank Selection: Available gas and "after use" predictions
+  - Add/Edit Tank: Max pressure and current pressure fields
+  - Tank Summary: Capacity and fill level displays
+
+- **Temperature Display** (Settings → Advanced)
+  - Gas temperature field now shows in user's preferred unit
+  - Automatic conversion when switching between °C and °F
+
+- **Internal Storage**
+  - All pressure values stored internally in bar (metric)
+  - All temperature values stored internally in Celsius
+  - Conversion happens only at display/input boundaries
+  - Real gas corrections continue to use internal bar values
+
+### Technical Details
+
+**Conversion Accuracy:**
+- PSI precision: 0 decimal places (whole numbers)
+- Bar precision: 0-2 decimal places depending on context
+- Temperature: Full precision maintained during conversions
+
+**Common Pressure Conversions:**
+- 200 bar = 2,901 PSI (European standard tank)
+- 232 bar = 3,365 PSI (HP tank)
+- 3,000 PSI = 207 bar (US standard tank)
+
+**Example Use Cases:**
+- US divers can work entirely in PSI/°F
+- European divers can work entirely in Bar/°C
+- All calculations remain accurate regardless of display unit
+- Storage tank deductions work correctly in both unit systems
 
 ---
 

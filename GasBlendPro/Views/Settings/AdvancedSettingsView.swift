@@ -41,9 +41,17 @@ struct AdvancedSettingsView: View {
                     TextField(
                         "20",
                         value: Binding(
-                            get: { appSettings.gasTemperature },
+                            get: {
+                                UnitConversion.temperature(
+                                    fromCelsius: appSettings.gasTemperature,
+                                    to: appSettings.temperatureUnit
+                                )
+                            },
                             set: { newValue in
-                                appSettings.gasTemperature = newValue
+                                appSettings.gasTemperature = UnitConversion.temperature(
+                                    fromUnit: appSettings.temperatureUnit,
+                                    value: newValue
+                                )
                                 appSettings.lastModified = Date()
                                 try? modelContext.save()
                             }
@@ -58,7 +66,7 @@ struct AdvancedSettingsView: View {
                         UIApplication.shared.sendAction(selector, to: nil, from: nil, for: nil)
                     }
 
-                    Text("°C")
+                    Text(appSettings.temperatureUnit.symbol)
                         .foregroundColor(.secondary)
                 }
             }

@@ -8,6 +8,8 @@ struct GeneralSettingsView: View {
     @Query private var settings: [AppSettings]
 
     @State private var showingAppearancePicker = false
+    @State private var showingPressureUnitPicker = false
+    @State private var showingTemperatureUnitPicker = false
 
     private var appSettings: AppSettings {
         if let existing = settings.first {
@@ -67,6 +69,56 @@ struct GeneralSettingsView: View {
                         Spacer()
                     }
                 }
+
+                Button {
+                    showingPressureUnitPicker = true
+                } label: {
+                    HStack {
+                        Image(systemName: "gauge.with.dots.needle.bottom.50percent")
+                            .font(.system(size: 20))
+                            .foregroundColor(.green)
+                            .frame(width: 28)
+
+                        Text("Pressure Unit")
+                            .font(.system(size: 17))
+                            .foregroundColor(.primary)
+
+                        Spacer()
+
+                        Text(appSettings.pressureUnit.displayName)
+                            .font(.system(size: 17))
+                            .foregroundColor(.secondary)
+
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Button {
+                    showingTemperatureUnitPicker = true
+                } label: {
+                    HStack {
+                        Image(systemName: "thermometer.variable.and.figure")
+                            .font(.system(size: 20))
+                            .foregroundColor(.orange)
+                            .frame(width: 28)
+
+                        Text("Temperature Unit")
+                            .font(.system(size: 17))
+                            .foregroundColor(.primary)
+
+                        Spacer()
+
+                        Text(appSettings.temperatureUnit.displayName)
+                            .font(.system(size: 17))
+                            .foregroundColor(.secondary)
+
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
         }
         .navigationTitle("General")
@@ -75,6 +127,20 @@ struct GeneralSettingsView: View {
             ForEach(AppearanceMode.allCases, id: \.self) { mode in
                 Button(mode.displayName) {
                     appSettings.appearanceMode = mode
+                }
+            }
+        }
+        .confirmationDialog("Pressure Unit", isPresented: $showingPressureUnitPicker) {
+            ForEach(PressureUnit.allCases, id: \.self) { unit in
+                Button(unit.displayName) {
+                    appSettings.pressureUnit = unit
+                }
+            }
+        }
+        .confirmationDialog("Temperature Unit", isPresented: $showingTemperatureUnitPicker) {
+            ForEach(TemperatureUnit.allCases, id: \.self) { unit in
+                Button(unit.displayName) {
+                    appSettings.temperatureUnit = unit
                 }
             }
         }

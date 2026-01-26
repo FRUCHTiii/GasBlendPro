@@ -114,12 +114,22 @@ struct BlenderSettingsView: View {
                         TextField(
                             "200",
                             value: Binding(
-                                get: { appSettings.defaultTargetPressure },
-                                set: { appSettings.defaultTargetPressure = $0 }
+                                get: {
+                                    UnitConversion.pressure(
+                                        fromBar: appSettings.defaultTargetPressure,
+                                        to: appSettings.pressureUnit
+                                    )
+                                },
+                                set: { newValue in
+                                    appSettings.defaultTargetPressure = UnitConversion.pressure(
+                                        fromUnit: appSettings.pressureUnit,
+                                        value: newValue
+                                    )
+                                }
                             ),
-                            format: .number.precision(.fractionLength(0))
+                            format: .number.precision(.fractionLength(appSettings.pressureUnit == .psi ? 1 : 0))
                         )
-                        .keyboardType(.numberPad)
+                        .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
                         .frame(width: 80)
                         .onSubmit {
@@ -127,7 +137,7 @@ struct BlenderSettingsView: View {
                             UIApplication.shared.sendAction(selector, to: nil, from: nil, for: nil)
                         }
 
-                        Text("bar")
+                        Text(appSettings.pressureUnit.symbol)
                             .foregroundColor(.secondary)
                     }
                 }

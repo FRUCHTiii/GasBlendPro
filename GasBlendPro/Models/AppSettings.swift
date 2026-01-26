@@ -35,11 +35,49 @@ enum AppearanceMode: String, Codable, CaseIterable {
     }
 }
 
+enum PressureUnit: String, Codable, CaseIterable {
+    case bar = "Bar"
+    case psi = "PSI"
+
+    var displayName: String {
+        self.rawValue
+    }
+
+    var symbol: String {
+        switch self {
+        case .bar:
+            return "bar"
+        case .psi:
+            return "psi"
+        }
+    }
+}
+
+enum TemperatureUnit: String, Codable, CaseIterable {
+    case celsius = "Celsius"
+    case fahrenheit = "Fahrenheit"
+
+    var displayName: String {
+        self.rawValue
+    }
+
+    var symbol: String {
+        switch self {
+        case .celsius:
+            return "°C"
+        case .fahrenheit:
+            return "°F"
+        }
+    }
+}
+
 @Model
 class AppSettings {
     var id: UUID
     var topUpGasRawValue: String
     var appearanceModeRawValue: String
+    var pressureUnitRawValue: String
+    var temperatureUnitRawValue: String
 
     // Default Blender Settings - with default values for migration
     var defaultCurrentOxygen: Double = 21.0
@@ -51,7 +89,7 @@ class AppSettings {
     // Disclaimer acceptance
     var hasAcceptedDisclaimer: Bool = false
 
-    // Real gas correction temperature (Celsius)
+    // Real gas correction temperature (stored in Celsius internally)
     // Default: 20°C (standard dive shop conditions)
     var gasTemperature: Double = 20.0
 
@@ -60,6 +98,8 @@ class AppSettings {
     init(
         topUpGas: TopUpGas = .air,
         appearanceMode: AppearanceMode = .system,
+        pressureUnit: PressureUnit = .bar,
+        temperatureUnit: TemperatureUnit = .celsius,
         defaultCurrentOxygen: Double = 21.0,
         defaultCurrentHelium: Double = 0.0,
         defaultTargetOxygen: Double = 32.0,
@@ -70,6 +110,8 @@ class AppSettings {
         self.id = UUID()
         self.topUpGasRawValue = topUpGas.rawValue
         self.appearanceModeRawValue = appearanceMode.rawValue
+        self.pressureUnitRawValue = pressureUnit.rawValue
+        self.temperatureUnitRawValue = temperatureUnit.rawValue
         self.defaultCurrentOxygen = defaultCurrentOxygen
         self.defaultCurrentHelium = defaultCurrentHelium
         self.defaultTargetOxygen = defaultTargetOxygen
@@ -95,6 +137,26 @@ class AppSettings {
         }
         set {
             appearanceModeRawValue = newValue.rawValue
+            lastModified = Date()
+        }
+    }
+
+    var pressureUnit: PressureUnit {
+        get {
+            PressureUnit(rawValue: pressureUnitRawValue) ?? .bar
+        }
+        set {
+            pressureUnitRawValue = newValue.rawValue
+            lastModified = Date()
+        }
+    }
+
+    var temperatureUnit: TemperatureUnit {
+        get {
+            TemperatureUnit(rawValue: temperatureUnitRawValue) ?? .celsius
+        }
+        set {
+            temperatureUnitRawValue = newValue.rawValue
             lastModified = Date()
         }
     }

@@ -42,10 +42,11 @@ jobs:
   
       - name: Build and Test
         run: |
+          set -o pipefail
           xcodebuild clean test \
             -scheme "${{ env.SCHEME }}" \
             -configuration "${{ env.CONFIGURATION }}" \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'platform=iOS Simulator,name=Any iOS Simulator Device' \
             -enableCodeCoverage YES \
             -derivedDataPath DerivedData \
             | xcbeautify
@@ -68,6 +69,7 @@ jobs:
   
       - name: Build for Device
         run: |
+          set -o pipefail
           xcodebuild clean build \
             -scheme "${{ env.SCHEME }}" \
             -configuration "${{ env.CONFIGURATION }}" \

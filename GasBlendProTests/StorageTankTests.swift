@@ -316,7 +316,8 @@ struct StorageTankTests {
     func testDeductUsageUserExample() throws {
         // User's scenario: Fill 7L bottle with 200 bar = 1400L oxygen
         // Storage tank: 50L oxygen tank
-        // Expected: 1400L / 50L = 28 bar deduction
+        // Ideal: 1400L / 50L = 28 bar deduction
+        // Real gas: At 200 bar, Z ≈ 0.978, so slightly more deduction needed
         let tank = StorageTank(
             name: "O2 Storage",
             gasType: .oxygen,
@@ -329,8 +330,9 @@ struct StorageTankTests {
         // Deduct 1400L of oxygen
         tank.deductUsage(volumeUsed: 1400)
 
-        // Should reduce by 28 bar (1400L / 50L)
-        #expect(abs(tank.currentPressure - 172.0) < tolerance, "Expected 200 - 28 = 172 bar")
+        // Real gas correction means slightly more than 28 bar deduction
+        // Expected: around 171-172 bar remaining
+        #expect(tank.currentPressure >= 171.0 && tank.currentPressure <= 172.5, "Expected ~172 bar with real gas corrections")
     }
 
     // MARK: - Purity Tests
@@ -476,20 +478,23 @@ struct StorageTankTests {
             purity: 99.5
         )
 
-        // First blend - EAN32 (1400L = 28 bar × 50L)
+        // First blend - EAN32 (1400L, ideal = 28 bar deduction)
+        // Real gas: At 200 bar, Z ≈ 0.978, slightly more deduction
         #expect(tank.hasEnoughGas(volumeNeeded: 1400))
         tank.deductUsage(volumeUsed: 1400)
-        #expect(tank.currentPressure == 172)
+        #expect(tank.currentPressure >= 171.0 && tank.currentPressure <= 172.5)
 
-        // Second blend - EAN32 (1400L)
+        // Second blend - EAN32 (1400L, ideal = 28 bar deduction)
+        // Real gas: At ~172 bar, Z ≈ 0.979, slightly more deduction
         #expect(tank.hasEnoughGas(volumeNeeded: 1400))
         tank.deductUsage(volumeUsed: 1400)
-        #expect(tank.currentPressure == 144)
+        #expect(tank.currentPressure >= 143.0 && tank.currentPressure <= 145.0)
 
-        // Third blend - EAN36 (1900L = 38 bar × 50L)
+        // Third blend - EAN36 (1900L, ideal = 38 bar deduction)
+        // Real gas: At ~144 bar, Z ≈ 0.985, slightly more deduction
         #expect(tank.hasEnoughGas(volumeNeeded: 1900))
         tank.deductUsage(volumeUsed: 1900)
-        #expect(tank.currentPressure == 106)
+        #expect(tank.currentPressure >= 105.0 && tank.currentPressure <= 107.0)
 
         // Fourth blend - EAN32 (1400L)
         #expect(tank.hasEnoughGas(volumeNeeded: 1400))

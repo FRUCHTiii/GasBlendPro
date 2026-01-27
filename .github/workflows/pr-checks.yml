@@ -36,10 +36,13 @@ jobs:
 
       - name: Show Xcode version
         run: xcodebuild -version
-  
+
+      - name: Download iOS Platform
+        run: xcodebuild -downloadPlatform iOS
+
       - name: Install xcbeautify
         run: brew install xcbeautify
-  
+
       - name: Build and Test
         run: |
           set -o pipefail

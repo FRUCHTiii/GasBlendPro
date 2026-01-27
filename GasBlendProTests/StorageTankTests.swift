@@ -4,7 +4,7 @@ import SwiftData
 
 /// Comprehensive unit tests for Storage Tank functionality
 /// Tests tank creation, percentage calculations, deduction logic, and validation
-@Suite("Storage Tank Tests")
+@Suite("Storage Tank Tests", .serialized)
 struct StorageTankTests {
     // MARK: - Test Constants
 
@@ -237,13 +237,13 @@ struct StorageTankTests {
             purity: 100.0
         )
 
-        // Use 2500L (ideal = 50 bar, real gas: Z ≈ 0.985 at 150 bar)
+        // Use 2500L from 150 bar, Z=0.985
         tank.deductUsage(volumeUsed: 2500)
-        #expect(tank.currentPressure >= 99.0 && tank.currentPressure <= 101.0)
+        #expect(abs(tank.currentPressure - 99.24) < 0.01)
 
-        // Use 1250L (ideal = 25 bar, real gas: Z ≈ 0.990 at 100 bar)
+        // Use 1250L from ~99.24 bar, Z≈0.990
         tank.deductUsage(volumeUsed: 1250)
-        #expect(tank.currentPressure >= 74.0 && tank.currentPressure <= 76.0)
+        #expect(abs(tank.currentPressure - 73.99) < 0.01)
     }
 
     @Test("deductUsage - to empty (volume-based)")
@@ -304,12 +304,12 @@ struct StorageTankTests {
             purity: 100.0
         )
 
-        // Use 250L × 10 = 2500L total (ideal = 50 bar, real gas corrections apply)
+        // Use 250L × 10 = 2500L total (Z varies from 0.978 at 200 bar down)
         for _ in 1...10 {
             tank.deductUsage(volumeUsed: 250)
         }
 
-        #expect(tank.currentPressure >= 149.0 && tank.currentPressure <= 151.0)
+        #expect(abs(tank.currentPressure - 149.04) < 0.01)
     }
 
     @Test("deductUsage - user's example: 1400L from 50L tank = 28 bar")
@@ -327,12 +327,11 @@ struct StorageTankTests {
             purity: 100.0
         )
 
-        // Deduct 1400L of oxygen
+        // Deduct 1400L from 200 bar, Z=0.978
         tank.deductUsage(volumeUsed: 1400)
 
-        // Real gas correction means slightly more than 28 bar deduction
-        // Expected: around 171-172 bar remaining
-        #expect(tank.currentPressure >= 171.0 && tank.currentPressure <= 172.5, "Expected ~172 bar with real gas corrections")
+        // Expected: 200 - (1400/0.978/50) = 171.37 bar
+        #expect(abs(tank.currentPressure - 171.37) < 0.01)
     }
 
     // MARK: - Purity Tests
@@ -441,10 +440,9 @@ struct StorageTankTests {
         #expect(tank.hasEnoughGas(volumeNeeded: 280))
 
         tank.deductUsage(volumeUsed: 280)
-        // Real gas corrections: at 180 bar, Z ≈ 0.978, so deduction > 28 bar
-        // Expected: ~152 bar or slightly less due to real gas effects
-        #expect(tank.currentPressure >= 150 && tank.currentPressure <= 153)
-        #expect(abs(tank.percentageFilled - 76.0) < 2.0) // Allow 2% tolerance
+        // From 180 bar, Z≈0.9808: 180 - (280/0.9808/10) = 151.45 bar
+        #expect(abs(tank.currentPressure - 151.45) < 0.01)
+        #expect(abs(tank.percentageFilled - 75.73) < 0.1) // 151.45/200 * 100
     }
 
     @Test("Large helium bank - technical diving")
@@ -462,9 +460,10 @@ struct StorageTankTests {
         // Typical trimix blend needs 7200L (90 bar × 80L tank)
         #expect(tank.hasEnoughGas(volumeNeeded: 7200))
 
-        tank.deductUsage(volumeUsed: 7200) // 7200L / 80L = 90 bar
-        #expect(tank.currentPressure >= 159.0 && tank.currentPressure <= 161.0)
-        #expect(abs(tank.percentageFilled - 53.33) < 0.1)
+        tank.deductUsage(volumeUsed: 7200) // Helium Z=1.015 at 250 bar: 7200/1.015/80 = 88.67 bar deduction
+        // Expected: 250 - 88.67 = 161.33 bar
+        #expect(abs(tank.currentPressure - 161.33) < 0.01)
+        #expect(abs(tank.percentageFilled - 53.78) < 0.1) // 161.33/300 * 100 = 53.78%
     }
 
     @Test("Multiple blends from single tank")
@@ -478,36 +477,33 @@ struct StorageTankTests {
             purity: 99.5
         )
 
-        // First blend - EAN32 (1400L, ideal = 28 bar deduction)
-        // Real gas: At 200 bar, Z ≈ 0.978, slightly more deduction
+        // First blend - 1400L from 200 bar, Z=0.978
         #expect(tank.hasEnoughGas(volumeNeeded: 1400))
         tank.deductUsage(volumeUsed: 1400)
-        #expect(tank.currentPressure >= 171.0 && tank.currentPressure <= 172.5)
+        #expect(abs(tank.currentPressure - 171.37) < 0.01)
 
-        // Second blend - EAN32 (1400L, ideal = 28 bar deduction)
-        // Real gas: At ~172 bar, Z ≈ 0.979, slightly more deduction
+        // Second blend - 1400L from ~171.37 bar, Z≈0.982
         #expect(tank.hasEnoughGas(volumeNeeded: 1400))
         tank.deductUsage(volumeUsed: 1400)
-        #expect(tank.currentPressure >= 143.0 && tank.currentPressure <= 145.0)
+        #expect(abs(tank.currentPressure - 142.86) < 0.01)
 
-        // Third blend - EAN36 (1900L, ideal = 38 bar deduction)
-        // Real gas: At ~144 bar, Z ≈ 0.985, slightly more deduction
+        // Third blend - 1900L from ~142.86 bar, Z≈0.986
         #expect(tank.hasEnoughGas(volumeNeeded: 1900))
         tank.deductUsage(volumeUsed: 1900)
-        #expect(tank.currentPressure >= 105.0 && tank.currentPressure <= 107.0)
+        #expect(abs(tank.currentPressure - 104.31) < 0.01)
 
-        // Fourth blend - EAN32 (1400L)
+        // Fourth blend - 1400L from ~104.31 bar, Z≈0.990
         #expect(tank.hasEnoughGas(volumeNeeded: 1400))
         tank.deductUsage(volumeUsed: 1400)
-        #expect(tank.currentPressure >= 77.0 && tank.currentPressure <= 79.0)
+        #expect(abs(tank.currentPressure - 76.01) < 0.01)
 
-        // Fifth blend attempt - should still have enough
+        // Fifth blend - 1400L from ~76.01 bar, Z≈0.992
         #expect(tank.hasEnoughGas(volumeNeeded: 1400))
         tank.deductUsage(volumeUsed: 1400)
-        #expect(tank.currentPressure >= 49.0 && tank.currentPressure <= 51.0)
+        #expect(abs(tank.currentPressure - 47.80) < 0.01)
 
-        // Still has ~25% left (real gas corrections accumulate over multiple deductions)
-        #expect(abs(tank.percentageFilled - 25.0) < 2.0) // Allow 2% tolerance for cumulative effects
+        // ~24% left after 5 blends (47.80/200 * 100 = 23.90%)
+        #expect(abs(tank.percentageFilled - 23.90) < 0.1)
     }
 
     @Test("Tank running low - warning scenario")
@@ -529,7 +525,8 @@ struct StorageTankTests {
         #expect(!tank.hasEnoughGas(volumeNeeded: 1750)) // 35 bar × 50L
 
         tank.deductUsage(volumeUsed: 1400)
-        #expect(tank.currentPressure >= 1.0 && tank.currentPressure <= 3.0)
+        // Expected: 30 - (1400/0.9985/50) = 1.92 bar
+        #expect(abs(tank.currentPressure - 1.92) < 0.01)
 
         // Now critically low - only 1% full
         #expect(tank.percentageFilled < 2.0)
@@ -553,9 +550,10 @@ struct StorageTankTests {
         // 50000L = 250 bar × 200L
         #expect(tank.hasEnoughGas(volumeNeeded: 50000))
 
-        tank.deductUsage(volumeUsed: 20000) // 20000L / 200L = 100 bar
-        #expect(tank.currentPressure >= 198.0 && tank.currentPressure <= 202.0)
-        #expect(abs(tank.percentageFilled - 50.0) < tolerance)
+        tank.deductUsage(volumeUsed: 20000) // O2 Z=0.955 at 300 bar: 20000/0.955/200 = 104.71 bar deduction
+        // Expected: 300 - 104.71 = 195.29 bar
+        #expect(abs(tank.currentPressure - 195.29) < 0.01)
+        #expect(abs(tank.percentageFilled - 48.82) < 0.1) // 195.29/400 * 100 = 48.82%
     }
 
     @Test("Very small tank")
@@ -573,9 +571,10 @@ struct StorageTankTests {
         // 25L = 25 bar × 1L
         #expect(tank.hasEnoughGas(volumeNeeded: 25))
 
-        tank.deductUsage(volumeUsed: 25) // 25L / 1L = 25 bar
-        #expect(tank.currentPressure >= 24.0 && tank.currentPressure <= 26.0)
-        #expect(abs(tank.percentageFilled - 25.0) < tolerance)
+        tank.deductUsage(volumeUsed: 25) // O2 Z=0.995 at 50 bar: 25/0.995/1 = 25.13 bar deduction
+        // Expected: 50 - 25.13 = 24.87 bar
+        #expect(abs(tank.currentPressure - 24.87) < 0.01)
+        #expect(abs(tank.percentageFilled - 24.87) < 0.1) // 24.87/100 * 100 = 24.87%
     }
 
     @Test("Fractional pressure values")
@@ -591,8 +590,8 @@ struct StorageTankTests {
 
         #expect(abs(tank.percentageFilled - 78.06) < 0.1)
 
-        tank.deductUsage(volumeUsed: 1390) // 1390L / 50L = 27.8 bar
-        #expect(tank.currentPressure >= 128.5 && tank.currentPressure <= 130.5)
+        tank.deductUsage(volumeUsed: 1390) // From 157.3 bar, Z≈0.984
+        #expect(abs(tank.currentPressure - 129.05) < 0.01)
     }
 
     // MARK: - Persistence Tests

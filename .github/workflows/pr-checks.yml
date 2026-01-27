@@ -13,7 +13,7 @@ env:
 jobs:
   lint:
     name: SwiftLint
-    runs-on: macos-15
+    runs-on: [self-hosted, macOS, ARM64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,19 +26,13 @@ jobs:
 
   test:
     name: Unit Tests
-    runs-on: macos-15
+    runs-on: [self-hosted, macOS, ARM64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_16.3.app/Contents/Developer
-
       - name: Show Xcode version
         run: xcodebuild -version
-
-      - name: Download iOS Platform
-        run: xcodebuild -downloadPlatform iOS
 
       - name: Install xcbeautify
         run: brew install xcbeautify
@@ -49,7 +43,7 @@ jobs:
           xcodebuild clean test \
             -scheme "${{ env.SCHEME }}" \
             -configuration "${{ env.CONFIGURATION }}" \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.4' \
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2,arch=arm64' \
             -enableCodeCoverage YES \
             -derivedDataPath DerivedData \
             | xcbeautify
@@ -62,14 +56,14 @@ jobs:
 
   build:
     name: Build Check
-    runs-on: macos-15
+    runs-on: [self-hosted, macOS, ARM64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_16.3.app/Contents/Developer
-  
+      - name: Install xcbeautify
+        run: brew install xcbeautify
+
       - name: Build for Device
         run: |
           set -o pipefail
@@ -85,7 +79,7 @@ jobs:
 
   security-audit:
     name: Security Audit
-    runs-on: macos-15
+    runs-on: [self-hosted, macOS, ARM64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -103,7 +97,7 @@ jobs:
 
   validation:
     name: Code Validation
-    runs-on: macos-15
+    runs-on: [self-hosted, macOS, ARM64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

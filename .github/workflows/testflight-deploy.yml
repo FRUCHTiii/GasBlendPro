@@ -112,7 +112,7 @@ jobs:
 
       - name: Upload IPA as artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: GasBlendPro-${{ steps.version.outputs.version }}
           path: "*.ipa"

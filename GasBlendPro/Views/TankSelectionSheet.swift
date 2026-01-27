@@ -60,6 +60,16 @@ struct TankSelectionRow: View {
     let temperature: Double
     let onSelect: () -> Void
 
+    @Query private var appSettingsList: [AppSettings]
+
+    private var appSettings: AppSettings? {
+        appSettingsList.first
+    }
+
+    private var pressureUnit: PressureUnit {
+        appSettings?.pressureUnit ?? .bar
+    }
+
     private var hasEnoughGas: Bool {
         tank.hasEnoughGas(volumeNeeded: volumeNeeded, temperature: temperature)
     }
@@ -119,7 +129,7 @@ struct TankSelectionRow: View {
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(fillLevelColor)
 
-                        Text(String(format: "%.0f / %.0f bar", tank.currentPressure, tank.maxPressure))
+                        Text(pressureDisplayText(current: tank.currentPressure, max: tank.maxPressure))
                             .font(.system(size: 13))
                             .foregroundColor(.secondary)
                     }
@@ -135,7 +145,7 @@ struct TankSelectionRow: View {
                             .font(.system(size: 13, weight: .medium))
                             .foregroundColor(.secondary)
 
-                        Text(String(format: "%.0f bar (%.0f%%)", remainingPressure, remainingPercentage))
+                        Text(afterUseText(pressure: remainingPressure, percentage: remainingPercentage))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(remainingFillLevelColor)
                     }
@@ -177,5 +187,23 @@ struct TankSelectionRow: View {
         } else {
             return .red
         }
+    }
+
+    private func pressureDisplayText(current: Double, max: Double) -> String {
+        let currentConverted = UnitConversion.pressure(fromBar: current, to: pressureUnit)
+        let maxConverted = UnitConversion.pressure(fromBar: max, to: pressureUnit)
+        let precision = pressureUnit == .psi ? 0 : 0
+        return String(
+            format: "%.\(precision)f / %.\(precision)f %@",
+            currentConverted,
+            maxConverted,
+            pressureUnit.symbol
+        )
+    }
+
+    private func afterUseText(pressure: Double, percentage: Double) -> String {
+        let converted = UnitConversion.pressure(fromBar: pressure, to: pressureUnit)
+        let precision = pressureUnit == .psi ? 0 : 0
+        return String(format: "%.\(precision)f %@ (%.0f%%)", converted, pressureUnit.symbol, percentage)
     }
 }

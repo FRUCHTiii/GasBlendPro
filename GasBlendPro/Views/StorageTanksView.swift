@@ -101,6 +101,16 @@ struct StorageTanksView: View {
 struct TankRow: View {
     let tank: StorageTank
 
+    @Query private var appSettingsList: [AppSettings]
+
+    private var appSettings: AppSettings? {
+        appSettingsList.first
+    }
+
+    private var pressureUnit: PressureUnit {
+        appSettings?.pressureUnit ?? .bar
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             // Gas type icon with fill indicator
@@ -160,7 +170,7 @@ struct TankRow: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(fillLevelColor)
 
-                Text(String(format: "%.0f / %.0f bar", tank.currentPressure, tank.maxPressure))
+                Text(pressureDisplayText(current: tank.currentPressure, max: tank.maxPressure))
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
             }
@@ -199,6 +209,18 @@ struct TankRow: View {
         } else {
             return .red
         }
+    }
+
+    private func pressureDisplayText(current: Double, max: Double) -> String {
+        let currentConverted = UnitConversion.pressure(fromBar: current, to: pressureUnit)
+        let maxConverted = UnitConversion.pressure(fromBar: max, to: pressureUnit)
+        let precision = pressureUnit == .psi ? 0 : 0
+        return String(
+            format: "%.\(precision)f / %.\(precision)f %@",
+            currentConverted,
+            maxConverted,
+            pressureUnit.symbol
+        )
     }
 }
 

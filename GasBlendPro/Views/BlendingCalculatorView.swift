@@ -192,7 +192,31 @@ struct BlendingCalculatorView: View {
             HStack(spacing: 12) {
                 AppleInputField(label: "O₂", value: $currentMix.oxygen, unit: "%")
                 AppleInputField(label: "He", value: $currentHelium, unit: "%")
-                AppleInputField(label: "Pressure", value: $currentPressure, unit: "bar")
+                AppleInputField(
+                    label: "Pressure",
+                    value: Binding(
+                        get: {
+                            if let appSettings = settings.first {
+                                return UnitConversion.pressure(
+                                    fromBar: currentPressure,
+                                    to: appSettings.pressureUnit
+                                )
+                            }
+                            return currentPressure
+                        },
+                        set: { newValue in
+                            if let appSettings = settings.first {
+                                currentPressure = UnitConversion.pressure(
+                                    fromUnit: appSettings.pressureUnit,
+                                    value: newValue
+                                )
+                            } else {
+                                currentPressure = newValue
+                            }
+                        }
+                    ),
+                    unit: settings.first?.pressureUnit.symbol ?? "bar"
+                )
             }
 
             currentPresetPickerView
@@ -223,7 +247,31 @@ struct BlendingCalculatorView: View {
             HStack(spacing: 12) {
                 AppleInputField(label: "O₂", value: $targetMix.oxygen, unit: "%")
                 AppleInputField(label: "He", value: $targetHelium, unit: "%")
-                AppleInputField(label: "Pressure", value: $targetPressure, unit: "bar")
+                AppleInputField(
+                    label: "Pressure",
+                    value: Binding(
+                        get: {
+                            if let appSettings = settings.first {
+                                return UnitConversion.pressure(
+                                    fromBar: targetPressure,
+                                    to: appSettings.pressureUnit
+                                )
+                            }
+                            return targetPressure
+                        },
+                        set: { newValue in
+                            if let appSettings = settings.first {
+                                targetPressure = UnitConversion.pressure(
+                                    fromUnit: appSettings.pressureUnit,
+                                    value: newValue
+                                )
+                            } else {
+                                targetPressure = newValue
+                            }
+                        }
+                    ),
+                    unit: settings.first?.pressureUnit.symbol ?? "bar"
+                )
             }
 
             presetMenuView

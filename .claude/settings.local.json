@@ -21,7 +21,9 @@
       "Bash(swift test:*)",
       "Bash(cat:*)",
       "Bash(open:*)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "Bash(xcrun simctl:*)",
+      "Bash(log show --predicate 'process == \"\"\"\"GasBlendPro\"\"\"\"' --last 2m --style syslog)"
     ],
     "deny": [],
     "ask": []

@@ -7,6 +7,16 @@ struct AddStorageTankView: View {
     @Environment(\.dismiss)
     private var dismiss
 
+    @Query private var appSettingsList: [AppSettings]
+
+    private var appSettings: AppSettings? {
+        appSettingsList.first
+    }
+
+    private var pressureUnit: PressureUnit {
+        appSettings?.pressureUnit ?? .bar
+    }
+
     @State private var name = ""
     @State private var gasType: GasType = .oxygen
     @State private var tankVolume: Double = 50
@@ -128,11 +138,25 @@ struct AddStorageTankView: View {
 
             HStack(spacing: 12) {
                 AppleInputField(label: "Volume", value: $tankVolume, unit: "L")
-                AppleInputField(label: "Max Pressure", value: $maxPressure, unit: "bar")
+                AppleInputField(
+                    label: "Max Pressure",
+                    value: Binding(
+                        get: { UnitConversion.pressure(fromBar: maxPressure, to: pressureUnit) },
+                        set: { maxPressure = UnitConversion.pressure(fromUnit: pressureUnit, value: $0) }
+                    ),
+                    unit: pressureUnit.symbol
+                )
             }
 
             HStack(spacing: 12) {
-                AppleInputField(label: "Current Pressure", value: $currentPressure, unit: "bar")
+                AppleInputField(
+                    label: "Current Pressure",
+                    value: Binding(
+                        get: { UnitConversion.pressure(fromBar: currentPressure, to: pressureUnit) },
+                        set: { currentPressure = UnitConversion.pressure(fromUnit: pressureUnit, value: $0) }
+                    ),
+                    unit: pressureUnit.symbol
+                )
                 AppleInputField(label: "Purity", value: $purity, unit: "%")
             }
         }
@@ -174,9 +198,21 @@ struct AddStorageTankView: View {
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.secondary)
                         Spacer()
-                        Text(String(format: "%.0f L @ %.0f bar", tankVolume, maxPressure))
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.primary)
+                        let convertedMaxPressure = UnitConversion.pressure(
+                            fromBar: maxPressure,
+                            to: pressureUnit
+                        )
+                        let precision = pressureUnit == .psi ? 0 : 0
+                        Text(
+                            String(
+                                format: "%.0f L @ %.\(precision)f %@",
+                                tankVolume,
+                                convertedMaxPressure,
+                                pressureUnit.symbol
+                            )
+                        )
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.primary)
                     }
 
                     HStack {
@@ -184,9 +220,21 @@ struct AddStorageTankView: View {
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(.secondary)
                         Spacer()
-                        Text(String(format: "%.0f%% (%.0f bar)", percentageFilled, currentPressure))
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(fillLevelColor)
+                        let convertedCurrentPressure = UnitConversion.pressure(
+                            fromBar: currentPressure,
+                            to: pressureUnit
+                        )
+                        let precision = pressureUnit == .psi ? 0 : 0
+                        Text(
+                            String(
+                                format: "%.0f%% (%.\(precision)f %@)",
+                                percentageFilled,
+                                convertedCurrentPressure,
+                                pressureUnit.symbol
+                            )
+                        )
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(fillLevelColor)
                     }
 
                     if purity < 100 {
@@ -283,6 +331,16 @@ struct EditStorageTankView: View {
     @Environment(\.dismiss)
     private var dismiss
     let tank: StorageTank
+
+    @Query private var appSettingsList: [AppSettings]
+
+    private var appSettings: AppSettings? {
+        appSettingsList.first
+    }
+
+    private var pressureUnit: PressureUnit {
+        appSettings?.pressureUnit ?? .bar
+    }
 
     @State private var name = ""
     @State private var tankVolume: Double = 0
@@ -399,11 +457,25 @@ struct EditStorageTankView: View {
 
             HStack(spacing: 12) {
                 AppleInputField(label: "Volume", value: $tankVolume, unit: "L")
-                AppleInputField(label: "Max Pressure", value: $maxPressure, unit: "bar")
+                AppleInputField(
+                    label: "Max Pressure",
+                    value: Binding(
+                        get: { UnitConversion.pressure(fromBar: maxPressure, to: pressureUnit) },
+                        set: { maxPressure = UnitConversion.pressure(fromUnit: pressureUnit, value: $0) }
+                    ),
+                    unit: pressureUnit.symbol
+                )
             }
 
             HStack(spacing: 12) {
-                AppleInputField(label: "Current Pressure", value: $currentPressure, unit: "bar")
+                AppleInputField(
+                    label: "Current Pressure",
+                    value: Binding(
+                        get: { UnitConversion.pressure(fromBar: currentPressure, to: pressureUnit) },
+                        set: { currentPressure = UnitConversion.pressure(fromUnit: pressureUnit, value: $0) }
+                    ),
+                    unit: pressureUnit.symbol
+                )
                 AppleInputField(label: "Purity", value: $purity, unit: "%")
             }
         }

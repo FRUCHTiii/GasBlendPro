@@ -21,7 +21,8 @@
       "Bash(swift test:*)",
       "Bash(cat:*)",
       "Bash(open:*)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "Bash(xcrun simctl:*)"
     ],
     "deny": [],
     "ask": []

@@ -21,7 +21,7 @@ struct TankSelectionSheet: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 ForEach(tanks) { tank in
                     TankSelectionRow(
@@ -37,7 +37,7 @@ struct TankSelectionSheet: View {
             .navigationTitle("Select \(gasType.rawValue) Tank")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Cancel") {
                         dismiss()
                     }

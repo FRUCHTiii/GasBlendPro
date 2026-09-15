@@ -176,7 +176,7 @@ struct BlenderSettingsView: View {
         title: String,
         onSelect: @escaping (GasPreset) -> Void
     ) -> some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 backgroundView
 
@@ -206,7 +206,7 @@ struct BlenderSettingsView: View {
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
                         if title == "Current Mix" {
                             showingCurrentPresetPicker = false

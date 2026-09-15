@@ -43,7 +43,7 @@ jobs:
           xcodebuild clean test \
             -scheme "${{ env.SCHEME }}" \
             -configuration "${{ env.CONFIGURATION }}" \
-            -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2,arch=arm64' \
+            -destination 'platform=iOS Simulator,name=iPhone 18 Pro,OS=27.0,arch=arm64' \
             -enableCodeCoverage YES \
             -derivedDataPath DerivedData \
             | xcbeautify

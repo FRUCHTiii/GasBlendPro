@@ -104,19 +104,21 @@ struct BlendingCalculatorView: View {
                         }
                     }
                 }
-
-                calculateButtonView
             }
+        }
+        .safeAreaInset(edge: .bottom) {
+            calculateButtonView
         }
         .navigationTitle("Blender")
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     resetToDefaults()
                 } label: {
                     Image(systemName: "arrow.counterclockwise")
                         .font(.system(size: 17))
                 }
+                .accessibilityLabel("Reset Calculator")
             }
         }
         .onAppear {
@@ -338,6 +340,7 @@ struct BlendingCalculatorView: View {
         } label: {
             presetPickerButtonContent(selectedPreset: selectedTargetPreset)
         }
+        .accessibilityIdentifier("targetPresetPicker")
         .sheet(isPresented: $showTargetPresetPicker) {
             presetPickerSheet(
                 title: "Target Mix Preset",
@@ -370,7 +373,7 @@ struct BlendingCalculatorView: View {
         isPresented: Binding<Bool>,
         onSelect: @escaping (GasPreset?) -> Void
     ) -> some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 Picker("Preset", selection: selectedPreset) {
                     Text("Custom").tag(nil as GasPreset?)
@@ -384,7 +387,7 @@ struct BlendingCalculatorView: View {
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
                         onSelect(selectedPreset.wrappedValue)
                         isPresented.wrappedValue = false
@@ -419,26 +422,27 @@ struct BlendingCalculatorView: View {
     }
 
     private var calculateButtonView: some View {
-        Button(action: performCalculation) {
-            Text("Calculate")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color(red: 0.0, green: 0.48, blue: 1.0),
-                            Color(red: 0.0, green: 0.42, blue: 0.9)
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .cornerRadius(12)
+        Group {
+            if #available(iOS 26.0, *) {
+                calculateButton
+                    .buttonStyle(.glassProminent)
+            } else {
+                calculateButton
+                    .buttonStyle(.borderedProminent)
+            }
         }
+        .controlSize(.large)
+        .tint(.blue)
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
+    }
+
+    private var calculateButton: some View {
+        Button(action: performCalculation) {
+            Text("Calculate")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+        }
     }
 
     private func performCalculation() {

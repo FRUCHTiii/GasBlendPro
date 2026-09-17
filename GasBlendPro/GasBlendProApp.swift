@@ -13,52 +13,49 @@ struct GasBlendProApp: App {
     @Environment(\.scenePhase)
     private var scenePhase
 
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            StorageTank.self,
-            GasPreset.self,
-            AppSettings.self
-        ])
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false,
-            allowsSave: true
-        )
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            // If migration fails, try deleting and recreating the container
-            NSLog("ModelContainer creation failed: \(error)")
-            NSLog("Attempting to reset model container...")
-
-            // Get the store URL and delete it
-            let storeURL = modelConfiguration.url
-            try? FileManager.default.removeItem(at: storeURL)
-            let shmURL = storeURL.deletingPathExtension().appendingPathExtension("sqlite-shm")
-            let walURL = storeURL.deletingPathExtension().appendingPathExtension("sqlite-wal")
-            try? FileManager.default.removeItem(at: shmURL)
-            try? FileManager.default.removeItem(at: walURL)
-
-            // Try again
-            do {
-                return try ModelContainer(for: schema, configurations: [modelConfiguration])
-            } catch {
-                fatalError("Could not create ModelContainer even after reset: \(error)")
-            }
-        }
-    }()
+    @State private var sharedModelContainer: ModelContainer?
+    @State private var storageUnavailable = false
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            Group {
+                if let sharedModelContainer {
+                    ContentView()
+                        .modelContainer(sharedModelContainer)
+                } else if storageUnavailable {
+                    ContentUnavailableView {
+                        Label("Unable to Open Saved Data", systemImage: "externaldrive.badge.exclamationmark")
+                    } description: {
+                        Text("Your saved data has been kept. Free up storage if needed, then try again.")
+                    } actions: {
+                        Button("Try Again", action: openStore)
+                            .buttonStyle(.borderedProminent)
+                    }
+                } else {
+                    ProgressView("Opening Saved Data")
+                }
+            }
+            .task {
+                if sharedModelContainer == nil && !storageUnavailable {
+                    openStore()
+                }
+            }
         }
-        .modelContainer(sharedModelContainer)
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background {
                 // App is going to background - clear session
                 clearSession()
             }
+        }
+    }
+
+    private func openStore() {
+        do {
+            sharedModelContainer = try AppPersistence.makeContainer()
+            storageUnavailable = false
+        } catch {
+            NSLog("ModelContainer creation failed: \(error)")
+            storageUnavailable = true
         }
     }
 

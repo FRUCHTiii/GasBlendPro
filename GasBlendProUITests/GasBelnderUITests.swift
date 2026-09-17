@@ -23,12 +23,40 @@ final class GasBlendProUITests: XCTestCase {
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testCalculatorAndPresetSheet() throws {
         let app = XCUIApplication()
         app.launch()
+        acceptDisclaimerIfNeeded(in: app)
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        app.buttons["gasBlender"].tap()
+        let presetPicker = app.buttons["targetPresetPicker"]
+        XCTAssertTrue(presetPicker.waitForExistence(timeout: 5))
+        presetPicker.tap()
+        XCTAssertTrue(app.navigationBars["Target Mix Preset"].waitForExistence(timeout: 5))
+        app.buttons["Done"].tap()
+        app.buttons["Calculate"].tap()
+        XCTAssertTrue(app.staticTexts["Blending Steps"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    func testStorageTankSheetCanBeDismissed() throws {
+        let app = XCUIApplication()
+        app.launch()
+        acceptDisclaimerIfNeeded(in: app)
+
+        app.buttons["storageTanks"].tap()
+        app.buttons["Add Storage Tank"].tap()
+        XCTAssertTrue(app.navigationBars["Add Storage Tank"].waitForExistence(timeout: 5))
+        app.buttons["Cancel"].tap()
+        XCTAssertTrue(app.navigationBars["Storage Tanks"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
+    private func acceptDisclaimerIfNeeded(in app: XCUIApplication) {
+        let accept = app.alerts["Safety Disclaimer"].buttons["Accept"]
+        if accept.waitForExistence(timeout: 3) {
+            accept.tap()
+        }
     }
 
     @MainActor

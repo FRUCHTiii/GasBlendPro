@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Support iOS 27 while keeping iOS 18.1+ compatibility; update the PR simulator destination and retain the existing release workflows.
+- Replace legacy sheet navigation with `NavigationStack` and current toolbar placements.
+- Use a system Liquid Glass Calculate button on iOS 26+ with an older-system fallback, positioned in the bottom safe area.
+
+### Fixed
+- Preserve the existing SwiftData store on opening errors and offer a retry screen instead of deleting saved data.
+- Supply metric defaults when migrating settings saved before unit preferences were added.
+
+### Tests
+- Add persistence reopening/error regressions and calculator/preset/storage sheet UI smoke tests.
+
 ### Planned
 - Additional preset gas mixes
 - Cubic feet volume units

@@ -2,6 +2,22 @@
 
 ## 🚀 Getting Your App to TestFlight
 
+### Automated version and build numbers
+
+The GitHub workflow takes the app version from the pushed Git tag: `v1.3.0`
+becomes `1.3.0`. The build number uses `run_number.run_attempt`: run 42 produces
+`42.1`, and retrying it produces `42.2`. Fastlane applies both values to the
+archive and preserves them during IPA export.
+
+Local Fastlane releases must supply `VERSION_NUMBER` and `BUILD_NUMBER` along
+with the existing signing/API credentials. The build number must be higher than
+the previous upload for that app version. Replaying an older workflow after a
+newer run has uploaded can still produce a lower build number.
+
+Check release versioning with `ruby fastlane/tests/versioning_test.rb`.
+Create release tags on the commit containing the pipeline fix; rerunning an old
+tag still checks out its original code.
+
 ### Prerequisites Checklist
 
 - [ ] **Apple Developer Account** ($99/year)

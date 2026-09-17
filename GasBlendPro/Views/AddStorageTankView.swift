@@ -26,7 +26,7 @@ struct AddStorageTankView: View {
     @State private var showGasTypePicker = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 backgroundView
 
@@ -44,13 +44,13 @@ struct AddStorageTankView: View {
             .navigationTitle("Add Storage Tank")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") {
                         dismiss()
                     }
                 }
 
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Add") {
                         addTank()
                     }
@@ -265,7 +265,7 @@ struct AddStorageTankView: View {
     }
 
     private var gasTypePickerSheet: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 Picker("Gas Type", selection: $gasType) {
                     Text("Oxygen").tag(GasType.oxygen)
@@ -277,7 +277,7 @@ struct AddStorageTankView: View {
             .navigationTitle("Gas Type")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
                         showGasTypePicker = false
                     }
@@ -349,7 +349,7 @@ struct EditStorageTankView: View {
     @State private var purity: Double = 100.0
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 backgroundView
 
@@ -367,13 +367,13 @@ struct EditStorageTankView: View {
             .navigationTitle("Edit Tank")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") {
                         dismiss()
                     }
                 }
 
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
                         saveTank()
                     }

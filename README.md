@@ -40,9 +40,9 @@ Ships with common technical diving gas mixes:
 
 ## Requirements
 
-- iOS 17.0+
-- Xcode 15.0+
-- Swift 5.9+
+- iOS 18.1+ (including iOS 27)
+- Xcode 27 with the iOS 27 SDK for iOS 27 development and testing
+- Swift compiler bundled with Xcode; the project retains Swift 5 language mode
 
 ---
 
@@ -111,8 +111,26 @@ Coming soon! Will be available after TestFlight beta testing.
 ```bash
 xcodebuild test \
   -scheme GasBlendPro \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro'
+  -destination 'platform=iOS Simulator,name=iPhone 18 Pro,OS=27.0'
 ```
+
+If multiple simulators have the same name, use `-destination 'platform=iOS Simulator,id=<UDID>'`
+with the identifier from `xcrun simctl list devices available`.
+
+### iOS 27 upgrade
+
+The app keeps its iOS 18.1 deployment target and existing SwiftData models/store location.
+Stored defaults let older settings migrate to metric pressure and temperature units.
+Sheets use `NavigationStack`, and Calculate uses the system Liquid Glass button style on
+iOS 26 and later, with a bordered prominent button on earlier versions.
+Store-opening failures display a retry screen while preserving saved data.
+
+The GitHub Actions workflows retain the setup from `main`. The only pipeline
+change is the PR test destination: iPhone 18 Pro / iOS 27.0 on the self-hosted
+runner. TestFlight and App Store workflows retain their existing runner and
+Xcode selection steps.
+
+See [the code review](CODE_REVIEW.md) for existing issues and upgrade validation results.
 
 ### Current Test Coverage
 - ✅ **60+ unit tests** covering gas blending calculations

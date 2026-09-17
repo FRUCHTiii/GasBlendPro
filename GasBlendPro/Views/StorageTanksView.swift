@@ -22,12 +22,13 @@ struct StorageTanksView: View {
         .navigationTitle("Storage Tanks")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showingAddTank = true
                 } label: {
                     Image(systemName: "plus")
                 }
+                .accessibilityLabel("Add Storage Tank")
             }
         }
         .sheet(isPresented: $showingAddTank) {

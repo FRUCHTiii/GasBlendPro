@@ -18,6 +18,7 @@ struct HomeView: View {
                                 color: .blue
                             )
                         }
+                        .accessibilityIdentifier("gasBlender")
 
                         NavigationLink(destination: StorageTanksView()) {
                             MenuCard(
@@ -27,6 +28,7 @@ struct HomeView: View {
                                 color: .orange
                             )
                         }
+                        .accessibilityIdentifier("storageTanks")
 
                         NavigationLink(destination: SettingsView()) {
                             MenuCard(

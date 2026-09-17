@@ -33,7 +33,7 @@ struct GasPresetsView: View {
         .navigationTitle("Gas Presets")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showingAddPreset = true
                 } label: {
@@ -62,7 +62,7 @@ struct GasPresetsView: View {
     }
 
     private var addPresetSheet: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 Color(uiColor: .systemGroupedBackground)
                     .ignoresSafeArea()
@@ -115,14 +115,14 @@ struct GasPresetsView: View {
             .navigationTitle("New Preset")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") {
                         showingAddPreset = false
                         resetAddPresetForm()
                     }
                 }
 
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
                         saveNewPreset()
                     }

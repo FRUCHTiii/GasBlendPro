@@ -76,8 +76,9 @@ class AppSettings {
     var id: UUID
     var topUpGasRawValue: String
     var appearanceModeRawValue: String
-    var pressureUnitRawValue: String
-    var temperatureUnitRawValue: String
+    // Stored defaults allow databases from before unit preferences to migrate.
+    var pressureUnitRawValue: String = "Bar"
+    var temperatureUnitRawValue: String = "Celsius"
 
     // Default Blender Settings - with default values for migration
     var defaultCurrentOxygen: Double = 21.0
